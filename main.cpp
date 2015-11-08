@@ -205,6 +205,32 @@ int main(int ac, const char* av[]) {
     cout << "\nTotal xmr received: " << cryptonote::print_money(money_transfered) << endl;
 
 
+    // new part
+
+
+//    core_storage.for_all_outputs(
+//            [](uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)->bool
+//            {
+//                cout << amount << endl;
+//                return true;
+//            }
+//    );
+//
+
+   size_t i {0};
+
+   core_storage.for_all_transactions(
+            [&](const crypto::hash& hash, const cryptonote::transaction& tx)->bool
+            {
+                if (++i % 1000 == 0)
+                {
+                    cout << i <<": " << hash << endl;
+                }
+
+                return true;
+            }
+    );
+
     cout << "\nEnd of program." << endl;
 
     return 0;
