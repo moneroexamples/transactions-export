@@ -16,7 +16,7 @@ namespace xmreg
         positional_options_description p;
 
         options_description desc(
-                "xmreg01, check if transaction's outputs belong to a given address");
+                "xmreg02, export all your transactions into csv file");
 
         desc.add_options()
                 ("help,h", value<bool>()->default_value(false)->implicit_value(true),
@@ -25,8 +25,6 @@ namespace xmreg
                  "monero address string")
                 ("viewkey,v", value<string>(),
                  "private view key string")
-                ("txhash,t", value<string>(),
-                 "public transaction hash")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain");
 

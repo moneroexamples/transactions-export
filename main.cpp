@@ -1,9 +1,11 @@
-#include <iostream>
-#include <string>
-
 #include "src/MicroCore.h"
 #include "src/CmdLineOptions.h"
 #include "src/tools.h"
+
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
 
 
 using namespace std;
@@ -32,7 +34,6 @@ int main(int ac, const char* av[]) {
     // get other options
     auto address_opt = opts.get_option<string>("address");
     auto viewkey_opt = opts.get_option<string>("viewkey");
-    auto tx_hash_opt = opts.get_option<string>("txhash");
     auto bc_path_opt = opts.get_option<string>("bc-path");
 
 
@@ -48,7 +49,6 @@ int main(int ac, const char* av[]) {
     // some default values for quick check
     string address_str = address_opt ? *address_opt : "48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU";
     string viewkey_str = viewkey_opt ? *viewkey_opt : "1ddabaa51cea5f6d9068728dc08c7ffaefe39a7a4b5f39fa8a976ecbe2cb520a";
-    string tx_hash_str = tx_hash_opt ? *tx_hash_opt : "66040ad29f0d780b4d47641a67f410c28cce575b5324c43b784bb376f4e30577";
     path blockchain_path = bc_path_opt ? path(*bc_path_opt) : path(default_lmdb_dir);
 
 
@@ -110,114 +110,18 @@ int main(int ac, const char* av[]) {
     }
 
 
-    // we also need tx public key, but we have tx hash only.
-    // to get the key, first, we obtained transaction object tx
-    // and then we get its public key from tx's extras.
-    cryptonote::transaction tx;
-
-    if (!xmreg::get_tx_pub_key_from_str_hash(core_storage, tx_hash_str, tx))
-    {
-        cerr << "Cant find transaction with hash: " << tx_hash_str << endl;
-        return 1;
-    }
-
-
-    crypto::public_key pub_tx_key = cryptonote::get_tx_pub_key_from_extra(tx);
-
-    if (pub_tx_key == cryptonote::null_pkey)
-    {
-        cerr << "Cant get public key of tx with hash: " << tx_hash_str << endl;
-        return 1;
-    }
-
-
-    // public transaction key is combined with our viewkey
-    // to create, so called, derived key.
-    crypto::key_derivation derivation;
-
-    if (!generate_key_derivation(pub_tx_key, prv_view_key, derivation))
-    {
-        cerr << "Cant get dervied key for: " << "\n"
-             << "pub_tx_key: " << prv_view_key << " and "
-             << "prv_view_key" << prv_view_key << endl;
-        return 1;
-    }
-
 
     // lets check our keys
     cout << "\n"
          << "address          : <" << xmreg::print_address(address) << ">\n"
          << "private view key : "  << prv_view_key << "\n"
-         << "tx hash          : <" << tx_hash_str << ">\n"
-         << "public tx key    : "  << pub_tx_key << "\n"
-         << "dervied key      : "  << derivation << "\n" << endl;
+         << endl;
 
 
-    // each tx that we (or the address we are checking) received
-    // contains a number of outputs.
-    // some of them are ours, some not. so we need to go through
-    // all of them in a given tx block, to check which outputs are ours.
-
-    // get the total number of outputs in a transaction.
-    size_t output_no = tx.vout.size();
-
-    // sum amount of xmr sent to us
-    // in the given transaction
-    uint64_t money_transfered {0};
-
-    // loop through outputs in the given tx
-    // to check which outputs our ours. we compare outputs'
-    // public keys with the public key that would had been
-    // generated for us if we had gotten the outputs.
-    // not sure this is the case though, but that's my understanding.
-    for (size_t i = 0; i < output_no; ++i)
-    {
-        // get the tx output public key
-        // that normally would be generated for us,
-        // if someone had sent us some xmr.
-        crypto::public_key pubkey;
-
-        crypto::derive_public_key(derivation,
-                                  i,
-                                  address.m_spend_public_key,
-                                  pubkey);
-
-        // get tx output public key
-        const cryptonote::txout_to_key tx_out_to_key
-                = boost::get<cryptonote::txout_to_key>(tx.vout[i].target);
-
-
-        cout << "Output no: " << i << ", " << tx_out_to_key.key;
-
-        // check if the output's public key is ours
-        if (tx_out_to_key.key == pubkey)
-        {
-            // if so, than add the xmr amount to the money_transfered
-            money_transfered += tx.vout[i].amount;
-            cout << ", mine key: " << cryptonote::print_money(tx.vout[i].amount) << endl;
-        }
-        else
-        {
-            cout << ", not mine key " << endl;
-        }
-    }
-
-    cout << "\nTotal xmr received: " << cryptonote::print_money(money_transfered) << endl;
-
-
-    // new part
-
-
-//    core_storage.for_all_outputs(
-//            [](uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)->bool
-//            {
-//                cout << amount << endl;
-//                return true;
-//            }
-//    );
-//
 
    size_t i {0};
+
+   unordered_map<crypto::hash, vector<cryptonote::tx_out>> our_transactions;
 
    core_storage.for_all_transactions(
             [&](const crypto::hash& hash, const cryptonote::transaction& tx)->bool
@@ -227,11 +131,36 @@ int main(int ac, const char* av[]) {
                     cout << i <<": " << hash << endl;
                 }
 
+                vector<cryptonote::tx_out> our_outputs =
+                        xmreg::get_belonging_outputs(tx,
+                                                     prv_view_key,
+                                                     address.m_spend_public_key);
+
+
+                if (!our_outputs.empty())
+                {
+                    cout << "Found " << our_outputs.size() << " outputs" << endl;
+                    our_transactions[hash] = our_outputs;
+                    return false;
+                }
+
                 return true;
             }
-    );
+   );
 
-    cout << "\nEnd of program." << endl;
 
-    return 0;
+   // print out found outputs
+   for (auto& kv: our_transactions)
+   {
+       cout << kv.first
+            << ": "
+            << ": ours "
+            << kv.second.size()
+            << endl;
+   }
+
+
+   cout << "\nEnd of program." << endl;
+
+   return 0;
 }

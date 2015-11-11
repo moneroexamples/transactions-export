@@ -7,12 +7,12 @@
 
 #define PATH_SEPARARTOR '/'
 
-#include <string>
-
 #include "monero_headers.h"
 
 #include <boost/filesystem.hpp>
 
+#include <string>
+#include <vector>
 
 /**
  * Some helper functions used in the example.
@@ -22,6 +22,7 @@
 namespace xmreg
 {
     using namespace cryptonote;
+    using namespace crypto;
     using namespace std;
 
     namespace bf = boost::filesystem;
@@ -53,6 +54,17 @@ namespace xmreg
 
     bf::path
     remove_trailing_path_separator(const bf::path& in_path);
+
+    vector<tx_out>
+    get_belonging_outputs(const transaction& tx,
+                          const secret_key& private_view_key,
+                          const public_key& public_spend_key);
+
+//    inline
+//    vector<tx_out>
+//    get_belonging_outputs(const transaction& tx,
+//                          const account_public_address& address);
+
 
 
 }
