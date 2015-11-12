@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
-project(xmreg02)
+
+set(PROJECT_NAME
+        xmr2csv)
+
+project(${PROJECT_NAME})
 
 set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -74,13 +78,13 @@ set(SOURCE_FILES
         main.cpp)
 
 # make executable called xmreg01
-add_executable(xmreg02
+add_executable(${PROJECT_NAME}
         ${SOURCE_FILES})
 
 
 # link our exexutable xmreg01 against
 # libraries
-target_link_libraries(xmreg02
+target_link_libraries(${PROJECT_NAME}
         myxrm
         cryptonote_core
         blockchain_db
