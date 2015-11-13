@@ -150,6 +150,24 @@ namespace xmreg
         // get transaction's public key
         public_key pub_tx_key = get_tx_pub_key_from_extra(tx);
 
+        // check if transaction has valid public key
+        // if no, then skip
+        if (pub_tx_key == null_pkey)
+        {
+            return our_outputs;
+        }
+
+
+        // get the total number of outputs in a transaction.
+        size_t output_no = tx.vout.size();
+
+        // check if the given transaction has any outputs
+        // if no, then finish
+        if (output_no == 0)
+        {
+            return our_outputs;
+        }
+
 
         // public transaction key is combined with our viewkey
         // to create, so called, derived key.
@@ -164,14 +182,12 @@ namespace xmreg
         }
 
 
-
         // each tx that we (or the address we are checking) received
         // contains a number of outputs.
         // some of them are ours, some not. so we need to go through
         // all of them in a given tx block, to check which outputs are ours.
 
-        // get the total number of outputs in a transaction.
-        size_t output_no = tx.vout.size();
+
 
         // sum amount of xmr sent to us
         // in the given transaction
