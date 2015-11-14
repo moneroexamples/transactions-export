@@ -185,7 +185,7 @@ int main(int ac, const char* av[]) {
 
 
             if (!our_outputs.empty()) {
-                cout << "Found " << our_outputs.size() << " outputs" << endl;
+                print("Found {} outputs in block {}\n", our_outputs.size(), i);
                 our_transactions[tx_hash] = our_outputs;
 
             }
@@ -195,39 +195,6 @@ int main(int ac, const char* av[]) {
     } // for (uint64_t i = 0; i < height; ++i)
 
 
-//
-//   size_t i {0};
-//
-//   unordered_map<crypto::hash, vector<cryptonote::tx_out>> our_transactions;
-//
-//
-//
-//   core_storage.for_all_transactions(
-//            [&](const crypto::hash& hash, const cryptonote::transaction& tx)->bool
-//            {
-//                if (++i % 1000 == 0)
-//                {
-//                    cout << i <<": " << hash << endl;
-//                }
-//
-//                vector<cryptonote::tx_out> our_outputs =
-//                        xmreg::get_belonging_outputs(tx,
-//                                                     prv_view_key,
-//                                                     address.m_spend_public_key);
-//
-//
-//                if (!our_outputs.empty())
-//                {
-//                    cout << "Found " << our_outputs.size() << " outputs" << endl;
-//                    our_transactions[hash] = our_outputs;
-//                    return false;
-//                }
-//
-//                return true;
-//            }
-//   );
-//
-//
    // print out found outputs
    for (const pair<crypto::hash, vector<cryptonote::tx_out>>& kv: our_transactions)
    {
