@@ -8,7 +8,7 @@
 #include <iostream>
 
 #include "monero_headers.h"
-
+#include "tx_details.h"
 
 
 

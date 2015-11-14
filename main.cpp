@@ -7,12 +7,12 @@
 
 #include <iostream>
 #include <string>
-#include <map>
 #include <vector>
 
 
 using namespace std;
-using namespace fmt;
+
+
 
 using boost::filesystem::path;
 using boost::filesystem::is_directory;
@@ -40,6 +40,7 @@ int main(int ac, const char* av[]) {
     auto address_opt      = opts.get_option<string>("address");
     auto viewkey_opt      = opts.get_option<string>("viewkey");
     auto start_height_opt = opts.get_option<size_t>("start-height");
+    auto out_csv_file_opt = opts.get_option<string>("out-csv-file");
     auto bc_path_opt      = opts.get_option<string>("bc-path");
 
 
@@ -53,9 +54,10 @@ int main(int ac, const char* av[]) {
 
     // get the program command line options, or
     // some default values for quick check
-    string address_str  = address_opt ? *address_opt : "48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU";
-    string viewkey_str  = viewkey_opt ? *viewkey_opt : "1ddabaa51cea5f6d9068728dc08c7ffaefe39a7a4b5f39fa8a976ecbe2cb520a";
-    size_t start_height = start_height_opt? *start_height_opt : 0;
+    string address_str   = address_opt ? *address_opt : "48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU";
+    string viewkey_str   = viewkey_opt ? *viewkey_opt : "1ddabaa51cea5f6d9068728dc08c7ffaefe39a7a4b5f39fa8a976ecbe2cb520a";
+    size_t start_height  = start_height_opt ? *start_height_opt : 0;
+    string out_csv_file  = out_csv_file_opt ? *out_csv_file_opt : "/tmp/xmr_incomming.csv";
     path blockchain_path = bc_path_opt ? path(*bc_path_opt) : path(default_lmdb_dir);
 
 
@@ -133,24 +135,25 @@ int main(int ac, const char* av[]) {
 
 
 
-    csv::ofstream os("/tmp/test.csv");
+    csv::ofstream csv_os {out_csv_file.c_str()};
 
-    os << 1 << "ff  fff" << 444 << NEWLINE;
-    os << 1 << "ff  fff" << 444 << NEWLINE;
-    os << 2 << "ff  \"fff" << prv_view_key << NEWLINE;
+    if (!csv_os.is_open())
+    {
+        cerr << "Cant open file: " << out_csv_file << endl;
+        return 1;
+    }
 
-    os.flush();
-    os.close();
-
-    unordered_map<crypto::hash, vector<cryptonote::tx_out>> our_transactions;
+    // write the header
+    csv_os << "Data" << "Time" << " Block_no"
+           << "Tx_hash" << "Out_num"<< "Amount" << NEWLINE;
 
     for (uint64_t i = start_height; i < height; ++i) {
 
         // show every nth output, just to give
         // a console some break
         if (i % 2000 == 0) {
+            cout << "Analysing block " << i <<  "/" << height << endl;
             //cout << format("Block {}\\{}", i, height)<< "\r" << flush;
-            print("Analyse block {}\\{}\n", i, height);
         }
 
 
@@ -159,6 +162,7 @@ int main(int ac, const char* av[]) {
             // block with given height not found.
             continue;
         }
+
 
         if (blk.tx_hashes.size() == 0) {
             // block has no transactions
@@ -178,15 +182,24 @@ int main(int ac, const char* av[]) {
             }
 
 
-            vector<cryptonote::tx_out> our_outputs =
-                    xmreg::get_belonging_outputs(tx,
-                                                 prv_view_key,
-                                                 address.m_spend_public_key);
+            vector<xmreg::transfer_details> found_outputs
+                    = xmreg::get_belonging_outputs(blk, tx,
+                                                   prv_view_key,
+                                                   address.m_spend_public_key,
+                                                   i);
 
+            if (!found_outputs.empty())
+            {
 
-            if (!our_outputs.empty()) {
-                print("Found {} outputs in block {}\n", our_outputs.size(), i);
-                our_transactions[tx_hash] = our_outputs;
+                cout << " - found " << found_outputs.size()
+                     << " outputs in block " << i
+                     << "- writing to the csv" << endl;
+
+                // save found transfrers to the csv file
+                for (const auto& tr_details: found_outputs)
+                {
+                    csv_os << tr_details << NEWLINE;
+                }
 
             }
 
@@ -195,18 +208,12 @@ int main(int ac, const char* av[]) {
     } // for (uint64_t i = 0; i < height; ++i)
 
 
-   // print out found outputs
-   for (const pair<crypto::hash, vector<cryptonote::tx_out>>& kv: our_transactions)
-   {
-       cout << kv.first
-            << ": "
-            << ": ours "
-            << kv.second.size()
-            << endl;
-   }
+    csv_os.flush();
+    csv_os.close();
 
+    cout << "\nCsv saved as: " << out_csv_file << endl;
 
-   cout << "\nEnd of program." << endl;
+    cout << "\nEnd of program." << endl;
 
-   return 0;
+    return 0;
 }

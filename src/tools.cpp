@@ -4,6 +4,9 @@
 
 #include "tools.h"
 
+#include <cstdlib>
+#include <iomanip>
+
 namespace xmreg
 {
 
@@ -132,113 +135,23 @@ namespace xmreg
     }
 
 
-
-    /**
-     * Get tx outputs associated with the given private view and public spend keys
-     *
-     *
-     */
-    vector<tx_out>
-    get_belonging_outputs(const transaction& tx,
-                          const secret_key& private_view_key,
-                          const public_key& public_spend_key)
+    string
+    timestamp_to_str(time_t timestamp, const char* format)
     {
-        // vector to be returned
-        vector<tx_out> our_outputs;
 
+        const int TIME_LENGTH = 60;
 
-        // get transaction's public key
-        public_key pub_tx_key = get_tx_pub_key_from_extra(tx);
+        char str_buff[TIME_LENGTH];
 
-        // check if transaction has valid public key
-        // if no, then skip
-        if (pub_tx_key == null_pkey)
-        {
-            return our_outputs;
-        }
+        tm *tm_ptr;
+        tm_ptr = localtime(&timestamp);
 
+        size_t len;
 
-        // get the total number of outputs in a transaction.
-        size_t output_no = tx.vout.size();
+        len = std::strftime(str_buff, TIME_LENGTH, format, tm_ptr);
 
-        // check if the given transaction has any outputs
-        // if no, then finish
-        if (output_no == 0)
-        {
-            return our_outputs;
-        }
-
-
-        // public transaction key is combined with our viewkey
-        // to create, so called, derived key.
-        key_derivation derivation;
-
-        if (!generate_key_derivation(pub_tx_key, private_view_key, derivation))
-        {
-            cerr << "Cant get dervied key for: " << "\n"
-            << "pub_tx_key: " << private_view_key << " and "
-            << "prv_view_key" << private_view_key << endl;
-            return our_outputs;
-        }
-
-
-        // each tx that we (or the address we are checking) received
-        // contains a number of outputs.
-        // some of them are ours, some not. so we need to go through
-        // all of them in a given tx block, to check which outputs are ours.
-
-
-
-        // sum amount of xmr sent to us
-        // in the given transaction
-        uint64_t money_transfered {0};
-
-        // loop through outputs in the given tx
-        // to check which outputs our ours. we compare outputs'
-        // public keys with the public key that would had been
-        // generated for us if we had gotten the outputs.
-        // not sure this is the case though, but that's my understanding.
-        for (size_t i = 0; i < output_no; ++i)
-        {
-           // get the tx output public key
-           // that normally would be generated for us,
-           // if someone had sent us some xmr.
-           public_key pubkey;
-
-           derive_public_key(derivation,
-                                      i,
-                                      public_spend_key,
-                                      pubkey);
-
-            // get tx output public key
-            const txout_to_key tx_out_to_key
-                    = boost::get<txout_to_key>(tx.vout[i].target);
-
-
-            //cout << "Output no: " << i << ", " << tx_out_to_key.key;
-
-            // check if the output's public key is ours
-            if (tx_out_to_key.key == pubkey)
-            {
-                // if so, then add this output to the
-                // returned vector
-                our_outputs.push_back(tx.vout[i]);
-            }
-        }
-
-        return our_outputs;
+        return string(str_buff, len);
     }
-
-//    inline
-//    vector<tx_out>
-//    get_belonging_outputs(const transaction& tx,
-//                          const account_public_address& address)
-//    {
-//        return  get_belonging_outputs(tx, address.)
-//    }
-//
-//
-
 
 
 }

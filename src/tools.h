@@ -8,6 +8,7 @@
 #define PATH_SEPARARTOR '/'
 
 #include "monero_headers.h"
+#include "tx_details.h"
 
 #include <boost/filesystem.hpp>
 
@@ -41,13 +42,11 @@ namespace xmreg
     parse_str_address(const string& address_str,
                       account_public_address& address);
 
-
     inline bool
     is_separator(char c);
 
     string
     print_address(const account_public_address& address);
-
 
     string
     remove_trailing_path_separator(const string& in_path);
@@ -55,17 +54,8 @@ namespace xmreg
     bf::path
     remove_trailing_path_separator(const bf::path& in_path);
 
-    vector<tx_out>
-    get_belonging_outputs(const transaction& tx,
-                          const secret_key& private_view_key,
-                          const public_key& public_spend_key);
-
-//    inline
-//    vector<tx_out>
-//    get_belonging_outputs(const transaction& tx,
-//                          const account_public_address& address);
-
-
+    string
+    timestamp_to_str(time_t timestamp, const char* format = "%F %T");
 
 }
 
