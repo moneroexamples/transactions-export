@@ -25,6 +25,8 @@ namespace xmreg
                  "monero address string")
                 ("viewkey,v", value<string>(),
                  "private view key string")
+                ("start-height,t", value<size_t>(),
+                 "private view key string")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain");
 
@@ -66,5 +68,8 @@ namespace xmreg
 
     template  boost::optional<bool>
             CmdLineOptions::get_option<bool>(const string & opt_name) const;
+
+    template  boost::optional<size_t>
+            CmdLineOptions::get_option<size_t>(const string & opt_name) const;
 
 }

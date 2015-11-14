@@ -95,9 +95,9 @@ namespace xmreg
         {
             block_id = m_blockchain_storage.get_block_id_by_height(height);
         }
-        catch (const std::exception& e)
+        catch (const exception& e)
         {
-            cerr << "Block with heigth: " << height << " not found!" << endl;
+            cerr << e.what() << endl;
             return false;
         }
 
@@ -111,8 +111,30 @@ namespace xmreg
         }
 
         return true;
-
     }
+
+
+
+    /**
+     * Get transaction tx from the blockchain using it hash
+     */
+    bool
+    MicroCore::get_tx(const crypto::hash& tx_hash, transaction& tx)
+    {
+        try
+        {
+            // get transaction with given hash
+            tx = m_blockchain_storage.get_db().get_tx(tx_hash);
+        }
+        catch (const exception& e)
+        {
+            cerr << e.what() << endl;
+            return false;
+        }
+
+        return true;
+    }
+
 
 
 

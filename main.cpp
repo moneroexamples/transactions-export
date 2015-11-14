@@ -37,9 +37,10 @@ int main(int ac, const char* av[]) {
     }
 
     // get other options
-    auto address_opt = opts.get_option<string>("address");
-    auto viewkey_opt = opts.get_option<string>("viewkey");
-    auto bc_path_opt = opts.get_option<string>("bc-path");
+    auto address_opt      = opts.get_option<string>("address");
+    auto viewkey_opt      = opts.get_option<string>("viewkey");
+    auto start_height_opt = opts.get_option<size_t>("start-height");
+    auto bc_path_opt      = opts.get_option<string>("bc-path");
 
 
     // default path to monero folder
@@ -52,8 +53,9 @@ int main(int ac, const char* av[]) {
 
     // get the program command line options, or
     // some default values for quick check
-    string address_str = address_opt ? *address_opt : "48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU";
-    string viewkey_str = viewkey_opt ? *viewkey_opt : "1ddabaa51cea5f6d9068728dc08c7ffaefe39a7a4b5f39fa8a976ecbe2cb520a";
+    string address_str  = address_opt ? *address_opt : "48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU";
+    string viewkey_str  = viewkey_opt ? *viewkey_opt : "1ddabaa51cea5f6d9068728dc08c7ffaefe39a7a4b5f39fa8a976ecbe2cb520a";
+    size_t start_height = start_height_opt? *start_height_opt : 0;
     path blockchain_path = bc_path_opt ? path(*bc_path_opt) : path(default_lmdb_dir);
 
 
@@ -92,6 +94,13 @@ int main(int ac, const char* av[]) {
     // get the current blockchain height. Just to check
     // if it reads ok.
     uint64_t height = core_storage.get_current_blockchain_height();
+
+    if (start_height > height)
+    {
+        cerr << "Given height is greater than blockchain height" << endl;
+        return 1;
+    }
+
 
     cout << "Current blockchain height: " << height << endl;
 
@@ -133,39 +142,57 @@ int main(int ac, const char* av[]) {
     os.flush();
     os.close();
 
+    unordered_map<crypto::hash, vector<cryptonote::tx_out>> our_transactions;
 
-    for (uint64_t i = 0; i < height; ++i)
-    {
-
+    for (uint64_t i = start_height; i < height; ++i) {
 
         // show every nth output, just to give
         // a console some break
-        if (i % 1000 == 0)
-        {
+        if (i % 2000 == 0) {
             //cout << format("Block {}\\{}", i, height)<< "\r" << flush;
             print("Analyse block {}\\{}\n", i, height);
         }
 
 
         cryptonote::block blk;
-        if (!mcore.get_block_by_height(i, blk))
-        {
+        if (!mcore.get_block_by_height(i, blk)) {
             // block with given height not found.
             continue;
         }
 
-        if (blk.tx_hashes.size() == 0)
-        {
+        if (blk.tx_hashes.size() == 0) {
             // block has no transactions
             continue;
         }
 
+        // process each transaction in a given block
+        for (const crypto::hash &tx_hash: blk.tx_hashes)
+        {
+            cryptonote::transaction tx;
 
 
+            if (!mcore.get_tx(tx_hash, tx))
+            {
+                // cant find transaction with a given hash
+                continue;
+            }
 
 
+            vector<cryptonote::tx_out> our_outputs =
+                    xmreg::get_belonging_outputs(tx,
+                                                 prv_view_key,
+                                                 address.m_spend_public_key);
 
-    }
+
+            if (!our_outputs.empty()) {
+                cout << "Found " << our_outputs.size() << " outputs" << endl;
+                our_transactions[tx_hash] = our_outputs;
+
+            }
+
+        }
+
+    } // for (uint64_t i = 0; i < height; ++i)
 
 
 //
@@ -201,15 +228,15 @@ int main(int ac, const char* av[]) {
 //   );
 //
 //
-//   // print out found outputs
-//   for (auto& kv: our_transactions)
-//   {
-//       cout << kv.first
-//            << ": "
-//            << ": ours "
-//            << kv.second.size()
-//            << endl;
-//   }
+   // print out found outputs
+   for (const pair<crypto::hash, vector<cryptonote::tx_out>>& kv: our_transactions)
+   {
+       cout << kv.first
+            << ": "
+            << ": ours "
+            << kv.second.size()
+            << endl;
+   }
 
 
    cout << "\nEnd of program." << endl;

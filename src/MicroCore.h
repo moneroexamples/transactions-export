@@ -34,11 +34,17 @@ namespace xmreg
     public:
         MicroCore();
 
-        bool init(const string& blockchain_path);
+        bool
+        init(const string& blockchain_path);
 
-        Blockchain& get_core();
+        Blockchain&
+        get_core();
 
-        bool get_block_by_height(const uint64_t& height, block& blk);
+        bool
+        get_block_by_height(const uint64_t& height, block& blk);
+
+        bool
+        get_tx(const crypto::hash& tx_hash, transaction& tx);
 
 
         virtual ~MicroCore();
