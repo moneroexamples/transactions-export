@@ -71,6 +71,9 @@ set_property(TARGET lmdb
         PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/liblmdb.a)
 
 # add src/ subfolder
+add_subdirectory(ext/)
+
+# add src/ subfolder
 add_subdirectory(src/)
 
 # speficie source files
@@ -86,6 +89,7 @@ add_executable(${PROJECT_NAME}
 # libraries
 target_link_libraries(${PROJECT_NAME}
         myxrm
+        myext
         cryptonote_core
         blockchain_db
         crypto

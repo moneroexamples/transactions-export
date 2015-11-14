@@ -80,8 +80,43 @@ namespace xmreg
         return m_blockchain_storage;
     }
 
-
     /**
+     * Get block by its height
+     *
+     * returns true if success
+     */
+    bool
+    MicroCore::get_block_by_height(const uint64_t& height, block& blk)
+    {
+
+        crypto::hash block_id;
+
+        try
+        {
+            block_id = m_blockchain_storage.get_block_id_by_height(height);
+        }
+        catch (const std::exception& e)
+        {
+            cerr << "Block with heigth: " << height << " not found!" << endl;
+            return false;
+        }
+
+
+        if (!m_blockchain_storage.get_block_by_hash(block_id, blk))
+        {
+            cerr << "Block with hash " << block_id
+                 << "and height " << height << " not found!"
+                 << endl;
+            return false;
+        }
+
+        return true;
+
+    }
+
+
+
+/**
      * De-initialized Blockchain.
      *
      * Its needed to mainly deallocate

@@ -2,6 +2,9 @@
 #include "src/CmdLineOptions.h"
 #include "src/tools.h"
 
+#include "ext/minicsv.h"
+#include "ext/format.h"
+
 #include <iostream>
 #include <string>
 #include <map>
@@ -9,6 +12,8 @@
 
 
 using namespace std;
+using namespace fmt;
+
 using boost::filesystem::path;
 using boost::filesystem::is_directory;
 
@@ -119,45 +124,92 @@ int main(int ac, const char* av[]) {
 
 
 
-   size_t i {0};
+    csv::ofstream os("/tmp/test.csv");
 
-   unordered_map<crypto::hash, vector<cryptonote::tx_out>> our_transactions;
+    os << 1 << "ff  fff" << 444 << NEWLINE;
+    os << 1 << "ff  fff" << 444 << NEWLINE;
+    os << 2 << "ff  \"fff" << prv_view_key << NEWLINE;
 
-   core_storage.for_all_transactions(
-            [&](const crypto::hash& hash, const cryptonote::transaction& tx)->bool
-            {
-                if (++i % 1000 == 0)
-                {
-                    cout << i <<": " << hash << endl;
-                }
-
-                vector<cryptonote::tx_out> our_outputs =
-                        xmreg::get_belonging_outputs(tx,
-                                                     prv_view_key,
-                                                     address.m_spend_public_key);
+    os.flush();
+    os.close();
 
 
-                if (!our_outputs.empty())
-                {
-                    cout << "Found " << our_outputs.size() << " outputs" << endl;
-                    our_transactions[hash] = our_outputs;
-                    return false;
-                }
-
-                return true;
-            }
-   );
+    for (uint64_t i = 0; i < height; ++i)
+    {
 
 
-   // print out found outputs
-   for (auto& kv: our_transactions)
-   {
-       cout << kv.first
-            << ": "
-            << ": ours "
-            << kv.second.size()
-            << endl;
-   }
+        // show every nth output, just to give
+        // a console some break
+        if (i % 1000 == 0)
+        {
+            //cout << format("Block {}\\{}", i, height)<< "\r" << flush;
+            print("Analyse block {}\\{}\n", i, height);
+        }
+
+
+        cryptonote::block blk;
+        if (!mcore.get_block_by_height(i, blk))
+        {
+            // block with given height not found.
+            continue;
+        }
+
+        if (blk.tx_hashes.size() == 0)
+        {
+            // block has no transactions
+            continue;
+        }
+
+
+
+
+
+
+    }
+
+
+//
+//   size_t i {0};
+//
+//   unordered_map<crypto::hash, vector<cryptonote::tx_out>> our_transactions;
+//
+//
+//
+//   core_storage.for_all_transactions(
+//            [&](const crypto::hash& hash, const cryptonote::transaction& tx)->bool
+//            {
+//                if (++i % 1000 == 0)
+//                {
+//                    cout << i <<": " << hash << endl;
+//                }
+//
+//                vector<cryptonote::tx_out> our_outputs =
+//                        xmreg::get_belonging_outputs(tx,
+//                                                     prv_view_key,
+//                                                     address.m_spend_public_key);
+//
+//
+//                if (!our_outputs.empty())
+//                {
+//                    cout << "Found " << our_outputs.size() << " outputs" << endl;
+//                    our_transactions[hash] = our_outputs;
+//                    return false;
+//                }
+//
+//                return true;
+//            }
+//   );
+//
+//
+//   // print out found outputs
+//   for (auto& kv: our_transactions)
+//   {
+//       cout << kv.first
+//            << ": "
+//            << ": ours "
+//            << kv.second.size()
+//            << endl;
+//   }
 
 
    cout << "\nEnd of program." << endl;

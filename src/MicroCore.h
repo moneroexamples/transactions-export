@@ -15,6 +15,7 @@
 namespace xmreg
 {
     using namespace cryptonote;
+    using namespace crypto;
     using namespace std;
 
     /**
@@ -36,6 +37,9 @@ namespace xmreg
         bool init(const string& blockchain_path);
 
         Blockchain& get_core();
+
+        bool get_block_by_height(const uint64_t& height, block& blk);
+
 
         virtual ~MicroCore();
     };
