@@ -126,7 +126,6 @@ int main(int ac, const char* av[]) {
     }
 
 
-
     // lets check our keys
     cout << "\n"
          << "address          : <" << xmreg::print_address(address) << ">\n"
@@ -147,25 +146,29 @@ int main(int ac, const char* av[]) {
     csv_os << "Data" << "Time" << " Block_no"
            << "Tx_hash" << "Out_num"<< "Amount" << NEWLINE;
 
+    // show command line output for every i-th block
+    const uint64_t EVERY_ith_BLOCK {2000};
+
     for (uint64_t i = start_height; i < height; ++i) {
 
         // show every nth output, just to give
         // a console some break
-        if (i % 2000 == 0) {
+        if (i % EVERY_ith_BLOCK == 0)
+        {
             cout << "Analysing block " << i <<  "/" << height << endl;
             //cout << format("Block {}\\{}", i, height)<< "\r" << flush;
         }
 
 
         cryptonote::block blk;
-        if (!mcore.get_block_by_height(i, blk)) {
-            // block with given height not found.
-            continue;
+
+        try
+        {
+            blk = core_storage.get_db().get_block_from_height(i);
         }
-
-
-        if (blk.tx_hashes.size() == 0) {
-            // block has no transactions
+        catch (std::exception& e)
+        {
+            cerr << e.what() << endl;
             continue;
         }
 
@@ -190,12 +193,11 @@ int main(int ac, const char* av[]) {
 
             if (!found_outputs.empty())
             {
-
                 cout << " - found " << found_outputs.size()
                      << " outputs in block " << i
-                     << "- writing to the csv" << endl;
+                     << "- writing to the csv." << endl;
 
-                // save found transfrers to the csv file
+                // save found transfers to the csv file
                 for (const auto& tr_details: found_outputs)
                 {
                     csv_os << tr_details << NEWLINE;
