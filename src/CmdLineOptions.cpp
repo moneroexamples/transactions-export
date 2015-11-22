@@ -26,9 +26,9 @@ namespace xmreg
                 ("viewkey,v", value<string>(),
                  "private view key string")
                 ("start-height,t", value<size_t>(),
-                 "private view key string")
+                 "start from given height")
                 ("start-date,d", value<string>(),
-                 "private view key string")
+                 "start roughly from given date: yyyy-mm-dd")
                 ("out-csv-file,c", value<string>(),
                  "private view key string")
                 ("bc-path,b", value<string>(),

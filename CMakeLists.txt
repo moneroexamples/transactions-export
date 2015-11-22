@@ -18,6 +18,7 @@ find_package(Boost COMPONENTS
         regex
         serialization
         program_options
+        date_time
         REQUIRED)
 
 # include boost headers

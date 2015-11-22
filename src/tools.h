@@ -14,6 +14,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <string>
 #include <vector>
@@ -30,6 +31,8 @@ namespace xmreg
     using namespace std;
 
     namespace bf = boost::filesystem;
+    namespace pt = boost::posix_time;
+    namespace gt = boost::gregorian;
 
     template <typename T>
     bool
@@ -82,6 +85,10 @@ namespace xmreg
         epee::log_space::get_set_log_detalisation_level(true, log_level);
         epee::log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
     }
+
+
+    uint64_t
+    estimate_bc_height(const string& date, const char* format = "%Y-%m-%d");
 
 
 
