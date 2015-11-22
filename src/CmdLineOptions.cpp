@@ -16,7 +16,7 @@ namespace xmreg
         positional_options_description p;
 
         options_description desc(
-                "xmreg02, export all your transactions into csv file");
+                "xmr2csv, export all your transactions into csv file");
 
         desc.add_options()
                 ("help,h", value<bool>()->default_value(false)->implicit_value(true),

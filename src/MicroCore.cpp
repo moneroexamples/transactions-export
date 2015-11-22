@@ -36,13 +36,7 @@ namespace xmreg
     {
         int db_flags = 0;
 
-        // MDB_RDONLY will result in
-        // m_blockchain_storage.deinit() producing
-        // error messages.
-
-        //db_flags |= MDB_RDONLY ;
-
-        db_flags |= MDB_NOSYNC;
+        db_flags |= MDB_RDONLY ;
 
         BlockchainDB* db = nullptr;
         db = new BlockchainLMDB();
@@ -138,20 +132,15 @@ namespace xmreg
 
 
 
-/**
+    /**
      * De-initialized Blockchain.
      *
-     * Its needed to mainly deallocate
-     * new BlockchainDB object
-     * created in the MicroCore::init().
-     *
-     * It also tries to synchronize the blockchain.
-     * And this is the reason when, if MDB_RDONLY
-     * is set, we are getting error messages. Because
-     * blockchain is readonly and we try to synchronize it.
+     * since blockchain is opened as MDB_RDONLY
+     * need to manually free memory taken on heap
+     * by BlockchainLMDB
      */
     MicroCore::~MicroCore()
     {
-        m_blockchain_storage.deinit();
+        delete &m_blockchain_storage.get_db();
     }
 }

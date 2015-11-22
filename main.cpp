@@ -13,9 +13,7 @@
 using namespace std;
 
 
-
 using boost::filesystem::path;
-using boost::filesystem::is_directory;
 
 // without this it wont work. I'm not sure what it does.
 // it has something to do with locking the blockchain and tx pool
@@ -44,13 +42,6 @@ int main(int ac, const char* av[]) {
     auto bc_path_opt      = opts.get_option<string>("bc-path");
 
 
-    // default path to monero folder
-    // on linux this is /home/<username>/.bitmonero
-    string default_monero_dir = tools::get_default_data_dir();
-
-    // the default folder of the lmdb blockchain database
-    // is therefore as follows
-    string default_lmdb_dir   = default_monero_dir + "/lmdb";
 
     // get the program command line options, or
     // some default values for quick check
@@ -58,26 +49,19 @@ int main(int ac, const char* av[]) {
     string viewkey_str   = viewkey_opt ? *viewkey_opt : "1ddabaa51cea5f6d9068728dc08c7ffaefe39a7a4b5f39fa8a976ecbe2cb520a";
     size_t start_height  = start_height_opt ? *start_height_opt : 0;
     string out_csv_file  = out_csv_file_opt ? *out_csv_file_opt : "/tmp/xmr_incomming.csv";
-    path blockchain_path = bc_path_opt ? path(*bc_path_opt) : path(default_lmdb_dir);
 
+    path blockchain_path;
 
-    if (!is_directory(blockchain_path))
+    if (!xmreg::get_blockchain_path(bc_path_opt, blockchain_path))
     {
-        cerr << "Given path \"" << blockchain_path   << "\" "
-             << "is not a folder or does not exist" << " "
-             << endl;
+        // if problem obtaining blockchain path, finish.
         return 1;
     }
-
-    blockchain_path = xmreg::remove_trailing_path_separator(blockchain_path);
 
     cout << "Blockchain path: " << blockchain_path << endl;
 
     // enable basic monero log output
-    uint32_t log_level = 0;
-    epee::log_space::get_set_log_detalisation_level(true, log_level);
-    epee::log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
-
+    xmreg::enable_monero_log();
 
     // create instance of our MicroCore
     xmreg::MicroCore mcore;

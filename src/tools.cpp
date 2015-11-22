@@ -154,4 +154,100 @@ namespace xmreg
     }
 
 
+    /*
+     * Generate key_image of foran ith output
+     */
+    bool
+    generate_key_image(const crypto::key_derivation& derivation,
+                       const std::size_t i,
+                       const crypto::secret_key& sec_key,
+                       const crypto::public_key& pub_key,
+                       crypto::key_image& key_img)
+    {
+
+        cryptonote::keypair in_ephemeral;
+
+        if (!crypto::derive_public_key(derivation, i,
+                                       pub_key,
+                                       in_ephemeral.pub))
+        {
+            cerr << "Error generating publick key " << pub_key << endl;
+            return false;
+        }
+
+        try
+        {
+
+            crypto::derive_secret_key(derivation, i,
+                                      sec_key,
+                                      in_ephemeral.sec);
+        }
+        catch(const std::exception& e)
+        {
+            cerr << "Error generate secret image: " << e.what() << endl;
+            return false;
+        }
+
+
+        try
+        {
+            crypto::generate_key_image(in_ephemeral.pub,
+                                       in_ephemeral.sec,
+                                       key_img);
+        }
+        catch(const std::exception& e)
+        {
+            cerr << "Error generate key image: " << e.what() << endl;
+            return false;
+        }
+
+        return true;
+    }
+
+
+    string
+    get_default_lmdb_folder()
+    {
+        // default path to monero folder
+        // on linux this is /home/<username>/.bitmonero
+        string default_monero_dir = tools::get_default_data_dir();
+
+        // the default folder of the lmdb blockchain database
+        // is therefore as follows
+        return default_monero_dir + string("/lmdb");
+    }
+
+
+    /*
+     * Ge blockchain exception from command line option
+     *
+     * If not given, provide default path
+     */
+    bool
+    get_blockchain_path(const boost::optional<string>& bc_path, bf::path& blockchain_path )
+    {
+        // the default folder of the lmdb blockchain database
+        string default_lmdb_dir   = xmreg::get_default_lmdb_folder();
+
+        blockchain_path = bc_path
+                          ? bf::path(*bc_path)
+                          : bf::path(default_lmdb_dir);
+
+
+
+        if (!bf::is_directory(blockchain_path))
+        {
+            cerr << "Given path \"" << blockchain_path   << "\" "
+                 << "is not a folder or does not exist" << " "
+                 << endl;
+
+            return false;
+        }
+
+        blockchain_path = xmreg::remove_trailing_path_separator(blockchain_path);
+
+        return true;
+
+    }
+
 }

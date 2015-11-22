@@ -11,6 +11,7 @@
 #include "tx_details.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 
 #include <string>
 #include <vector>
@@ -56,6 +57,31 @@ namespace xmreg
 
     string
     timestamp_to_str(time_t timestamp, const char* format = "%F %T");
+
+
+    string
+    get_default_lmdb_folder();
+
+    bool
+    generate_key_image(const crypto::key_derivation& derivation,
+                       const std::size_t output_index,
+                       const crypto::secret_key& sec_key,
+                       const crypto::public_key& pub_key,
+                       crypto::key_image& key_img);
+
+    bool
+    get_blockchain_path(const boost::optional<string>& bc_path,
+                        bf::path& blockchain_path);
+
+
+    inline void
+    enable_monero_log() {
+        uint32_t log_level = 0;
+        epee::log_space::get_set_log_detalisation_level(true, log_level);
+        epee::log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
+    }
+
+
 
 }
 
