@@ -4,12 +4,10 @@
 
 #include "tools.h"
 
-#include <cstdlib>
-#include <iomanip>
+
 
 namespace xmreg
 {
-
 
     /**
      * Parse key string, e.g., a viewkey in a string

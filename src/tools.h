@@ -10,6 +10,8 @@
 #include "monero_headers.h"
 #include "tx_details.h"
 
+#include "../ext/dateparser.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 

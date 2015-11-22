@@ -42,6 +42,25 @@ int main(int ac, const char* av[]) {
     auto bc_path_opt      = opts.get_option<string>("bc-path");
 
 
+    string date {"11/11/1996"};
+
+    dateparser parser("%d/%m/%Y");
+
+    if (parser(date))
+    {
+        cout << date << " is correct" << endl;
+    }
+    else
+    {
+        cerr << date << " incorrect" << endl;
+
+    }
+
+
+
+    return 0;
+
+
 
     // get the program command line options, or
     // some default values for quick check
