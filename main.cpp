@@ -38,27 +38,9 @@ int main(int ac, const char* av[]) {
     auto address_opt      = opts.get_option<string>("address");
     auto viewkey_opt      = opts.get_option<string>("viewkey");
     auto start_height_opt = opts.get_option<size_t>("start-height");
+    auto start_date_opt   = opts.get_option<string>("start-date");
     auto out_csv_file_opt = opts.get_option<string>("out-csv-file");
     auto bc_path_opt      = opts.get_option<string>("bc-path");
-
-
-    string date {"11/11/1996"};
-
-    dateparser parser("%d/%m/%Y");
-
-    if (parser(date))
-    {
-        cout << date << " is correct" << endl;
-    }
-    else
-    {
-        cerr << date << " incorrect" << endl;
-
-    }
-
-
-
-    return 0;
 
 
 
@@ -67,6 +49,7 @@ int main(int ac, const char* av[]) {
     string address_str   = address_opt ? *address_opt : "48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU";
     string viewkey_str   = viewkey_opt ? *viewkey_opt : "1ddabaa51cea5f6d9068728dc08c7ffaefe39a7a4b5f39fa8a976ecbe2cb520a";
     size_t start_height  = start_height_opt ? *start_height_opt : 0;
+    string start_date    = start_date_opt ? *start_date_opt : "01-01-1970";
     string out_csv_file  = out_csv_file_opt ? *out_csv_file_opt : "/tmp/xmr_incomming.csv";
 
     path blockchain_path;
@@ -76,6 +59,23 @@ int main(int ac, const char* av[]) {
         // if problem obtaining blockchain path, finish.
         return 1;
     }
+
+
+    dateparser parser {"%d-%m-%Y"};
+
+    if (parser(start_date))
+    {
+        cout << start_date << " is correct" << endl;
+    }
+    else
+    {
+        cerr << start_date << " incorrect" << endl;
+    }
+
+
+    return 0;
+
+
 
     cout << "Blockchain path: " << blockchain_path << endl;
 

@@ -27,6 +27,8 @@ namespace xmreg
                  "private view key string")
                 ("start-height,t", value<size_t>(),
                  "private view key string")
+                ("start-date,d", value<string>(),
+                 "private view key string")
                 ("out-csv-file,c", value<string>(),
                  "private view key string")
                 ("bc-path,b", value<string>(),
