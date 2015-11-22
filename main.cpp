@@ -134,8 +134,6 @@ int main(int ac, const char* av[]) {
          << endl;
 
 
-    return 0;
-
     // parse string representing given monero address
     cryptonote::account_public_address address;
 
