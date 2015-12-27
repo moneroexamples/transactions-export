@@ -38,7 +38,7 @@ include_directories(
         ${MONERO_HEADERS_DIR}/src
         ${MONERO_HEADERS_DIR}/external
         ${MONERO_HEADERS_DIR}/contrib/epee/include
-        ${MONERO_HEADERS_DIR}/external/db_drivers/liblmdb64)
+        ${MONERO_HEADERS_DIR}/external/db_drivers/liblmdb)
 
 
 
