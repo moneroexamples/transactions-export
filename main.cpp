@@ -208,18 +208,21 @@ int main(int ac, const char* av[]) {
             continue;
         }
 
-        // process each transaction in a given block
-        for (const crypto::hash &tx_hash: blk.tx_hashes)
+        // get all transactions in the block found
+        // initialize the first list with transaction for solving
+        // the block i.e. coinbase.
+        list<cryptonote::transaction> txs {blk.miner_tx};
+        list<crypto::hash> missed_txs;
+
+        if (!mcore.get_core().get_transactions(blk.tx_hashes, txs, missed_txs))
         {
-            cryptonote::transaction tx;
+            cerr << "Cant find transcations in block: " << height << endl;
+            return false;
+        }
 
-
-            if (!mcore.get_tx(tx_hash, tx))
-            {
-                // cant find transaction with a given hash
-                continue;
-            }
-
+        for (const cryptonote::transaction& tx : txs)
+        {
+            crypto::hash tx_hash = cryptonote::get_transaction_hash(tx);
 
             vector<xmreg::transfer_details> found_outputs
                     = xmreg::get_belonging_outputs(blk, tx,
