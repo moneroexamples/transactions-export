@@ -41,6 +41,7 @@ int main(int ac, const char* av[]) {
     auto start_date_opt   = opts.get_option<string>("start-date");
     auto out_csv_file_opt = opts.get_option<string>("out-csv-file");
     auto bc_path_opt      = opts.get_option<string>("bc-path");
+    auto testnet_opt      = opts.get_option<bool>("testnet");
 
 
 
@@ -51,6 +52,9 @@ int main(int ac, const char* av[]) {
     size_t start_height  = start_height_opt ? *start_height_opt : 0;
     string start_date    = start_date_opt ? *start_date_opt : "1970-01-01";
     string out_csv_file  = out_csv_file_opt ? *out_csv_file_opt : "/tmp/xmr_incomming.csv";
+    bool testnet         = *testnet_opt ;
+
+    cout << testnet << endl;
 
     path blockchain_path;
 
@@ -137,7 +141,7 @@ int main(int ac, const char* av[]) {
     // parse string representing given monero address
     cryptonote::account_public_address address;
 
-    if (!xmreg::parse_str_address(address_str,  address))
+    if (!xmreg::parse_str_address(address_str,  address, testnet))
     {
         cerr << "Cant parse string address: " << address_str << endl;
         return 1;
@@ -155,7 +159,7 @@ int main(int ac, const char* av[]) {
 
     // lets check our keys
     cout << "\n"
-         << "address          : <" << xmreg::print_address(address) << ">\n"
+         << "address          : <" << xmreg::print_address(address, testnet) << ">\n"
          << "private view key : "  << prv_view_key << "\n"
          << endl;
 
@@ -174,7 +178,12 @@ int main(int ac, const char* av[]) {
            << "Tx_hash" << "Out_num"<< "Amount" << NEWLINE;
 
     // show command line output for every i-th block
-    const uint64_t EVERY_ith_BLOCK {2000};
+    uint64_t EVERY_ith_BLOCK {2000};
+
+    if (EVERY_ith_BLOCK > height)
+    {
+        EVERY_ith_BLOCK = height / 10;
+    }
 
     for (uint64_t i = start_height; i < height; ++i) {
 

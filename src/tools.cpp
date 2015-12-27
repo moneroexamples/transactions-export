@@ -75,10 +75,12 @@ namespace xmreg
      * cryptonote::account_public_address object
      */
     bool
-    parse_str_address(const string& address_str, account_public_address& address)
+    parse_str_address(const string& address_str,
+                      account_public_address& address,
+                      bool testnet)
     {
 
-        if (!get_account_address_from_str(address, false, address_str))
+        if (!get_account_address_from_str(address, testnet, address_str))
         {
             cerr << "Error getting address: " << address_str << endl;
             return false;
@@ -92,9 +94,11 @@ namespace xmreg
      * Return string representation of monero address
      */
     string
-    print_address(const account_public_address& address)
+    print_address(const account_public_address& address, bool testnet)
     {
-        return get_account_address_as_str(false, address);
+
+
+        return get_account_address_as_str(testnet, address);
     }
 
 

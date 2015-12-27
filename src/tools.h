@@ -46,13 +46,14 @@ namespace xmreg
 
     bool
     parse_str_address(const string& address_str,
-                      account_public_address& address);
+                      account_public_address& address,
+                      bool testnet = false);
 
     inline bool
     is_separator(char c);
 
     string
-    print_address(const account_public_address& address);
+    print_address(const account_public_address& address, bool testnet = false);
 
     string
     remove_trailing_path_separator(const string& in_path);

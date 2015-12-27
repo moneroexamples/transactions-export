@@ -32,7 +32,9 @@ namespace xmreg
                 ("out-csv-file,c", value<string>(),
                  "private view key string")
                 ("bc-path,b", value<string>(),
-                 "path to lmdb blockchain");
+                 "path to lmdb blockchain")
+                ("testnet",  value<bool>()->default_value(false)->implicit_value(true),
+                 "is the address from testnet network");
 
 
         store(command_line_parser(acc, avv)
@@ -46,6 +48,8 @@ namespace xmreg
             if (vm["help"].as<bool>())
                 cout << desc << "\n";
         }
+
+
     }
 
     /**
