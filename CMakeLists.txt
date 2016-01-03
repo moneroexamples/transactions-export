@@ -100,3 +100,6 @@ target_link_libraries(${PROJECT_NAME}
         ${Boost_LIBRARIES}
         pthread
         unbound)
+
+install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
