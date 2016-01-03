@@ -8,6 +8,9 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -std=c++11")
 
+set(CMAKE_INSTALL_PREFIX
+        /opt/bitmonero/)
+
 # find boost
 find_package(Boost COMPONENTS
         system
