@@ -9,20 +9,18 @@
 #include <string>
 #include <vector>
 
+using boost::filesystem::path;
 
+using namespace fmt;
 using namespace std;
 
-
-using boost::filesystem::path;
 
 // without this it wont work. I'm not sure what it does.
 // it has something to do with locking the blockchain and tx pool
 // during certain operations to avoid deadlocks.
 
 namespace epee {
-
     unsigned int g_test_dbg_lock_sleep = 0;
-
 }
 
 
@@ -68,7 +66,8 @@ int main(int ac, const char* av[]) {
         return 1;
     }
 
-    cout << "Blockchain path: " << blockchain_path << endl;
+
+    print("Blockchain path: {:s}\n", blockchain_path);
 
 
     // enable basic monero log output
@@ -99,67 +98,53 @@ int main(int ac, const char* av[]) {
     }
 
 
-    cout << "Requested time: " << start_date << endl;
-
-
-    try
+    if (start_date_opt)
     {
-        // estimate blockchain height from the start date provided
-        start_height = xmreg::estimate_bc_height(start_date);
+        // if we gave starting date use the date to
+        // determine the starting block height
 
-        cryptonote::block blk;
+        print("Requested starting date: {:s}\n", start_date);
 
-        if (!mcore.get_block_by_height(start_height, blk))
+        try
         {
-            cerr << "Cant get block by date: " << start_date << endl;
+            // estimate blockchain height from the start date provided
+            start_height = xmreg::estimate_bc_height(start_date);
+
+            // get block of based on the start_height
+            // and display its timestamp so that we can
+            // see how far in the past are we, or
+            // how roughly the height was estimated from
+            // the given date.
+            cryptonote::block blk;
+
+            if (!mcore.get_block_by_date(start_date, blk, start_height))
+            {
+                cerr << "Cant get block by date: " << start_date << endl;
+                return 1;
+            }
+
+
+            // set new start_height block based on the date given
+            start_height = cryptonote::get_block_height(blk);
+        }
+        catch (const exception& e)
+        {
+            cerr << e.what() << endl;
             return 1;
         }
-
-        cout << "Guest block time: "
-                << blk.timestamp << " "
-                << xmreg::timestamp_to_str(blk.timestamp)
-                << endl;
-
-
-    }
-    catch (const exception& e)
-    {
-        cerr << e.what() << endl;
-        return 1;
     }
 
 
-
-
-
-
-    // get block of based on the start_height
-    // and display its timestamp so that we can
-    // see how far in the past are we, or
-    // how roughly the height was estimated from
-    // the given date.
     cryptonote::block blk;
 
-    if (!mcore.get_block_by_date(start_date, blk, start_height))
+    if (!mcore.get_block_by_height(start_height, blk))
     {
         cerr << "Cant get block by date: " << start_date << endl;
         return 1;
     }
 
-
-    uint64_t blk_height = cryptonote::get_block_height(blk);
-
-
-    cout << "Actual block time: "
-         << blk.timestamp << " "
-         << xmreg::timestamp_to_str(blk.timestamp)
-         << endl;
-
-    cout << "Block height: " << blk_height << endl;
-
-
-    return 0;
-
+    print("Start block date       : {:s}\n", xmreg::timestamp_to_str(blk.timestamp));
+    print("Start block height     : {:d}\n", start_height);
 
     // parse string representing given monero address
     cryptonote::account_public_address address;
@@ -187,7 +172,6 @@ int main(int ac, const char* av[]) {
          << endl;
 
 
-
     csv::ofstream csv_os {out_csv_file.c_str()};
 
     if (!csv_os.is_open())
@@ -210,14 +194,6 @@ int main(int ac, const char* av[]) {
 
     for (uint64_t i = start_height; i < height; ++i) {
 
-        // show every nth output, just to give
-        // a console some break
-        if (i % EVERY_ith_BLOCK == 0)
-        {
-            cout << "Analysing block " << i <<  "/" << height << endl;
-            //cout << format("Block {}\\{}", i, height)<< "\r" << flush;
-        }
-
 
         cryptonote::block blk;
 
@@ -229,6 +205,14 @@ int main(int ac, const char* av[]) {
         {
             cerr << e.what() << endl;
             continue;
+        }
+
+        // show every nth output, just to give
+        // a console some break
+        if (i % EVERY_ith_BLOCK == 0)
+        {
+            print("Analysing block {:08d}/{:08d} - date {:s}\n",
+                  i, height, xmreg::timestamp_to_str(blk.timestamp));
         }
 
         // get all transactions in the block found
@@ -248,16 +232,13 @@ int main(int ac, const char* av[]) {
             crypto::hash tx_hash = cryptonote::get_transaction_hash(tx);
 
             vector<xmreg::transfer_details> found_outputs
-                    = xmreg::get_belonging_outputs(blk, tx,
-                                                   prv_view_key,
-                                                   address.m_spend_public_key,
-                                                   i);
+                    = xmreg::get_belonging_outputs(blk, tx, prv_view_key,
+                                                   address.m_spend_public_key, i);
 
             if (!found_outputs.empty())
             {
-                cout << " - found " << found_outputs.size()
-                     << " outputs in block " << i
-                     << "- writing to the csv." << endl;
+                print(" - found {:02d} outputs in block {:08d} - writing to the csv\n",
+                      found_outputs.size(), i);
 
                 // save found transfers to the csv file
                 for (const auto& tr_details: found_outputs)

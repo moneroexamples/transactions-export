@@ -125,6 +125,13 @@ namespace xmreg
         // get the current blockchain height.
         uint64_t max_height = m_blockchain_storage.get_current_blockchain_height();
 
+        if (init_height > max_height)
+        {
+            cerr << "Initial height higher than current blockchain height!" << endl;
+            return false;
+        }
+
+
         // first parse the string date into boost's ptime object
         dateparser parser {format};
 
@@ -150,7 +157,7 @@ namespace xmreg
         // assume the initall block is correct
         blk = tmp_blk;
 
-        // get timestiamp of the initial block
+        // get timestamp of the initial block
         //cout << tmp_blk.timestamp  << ", " << searched_timestamp << endl;
 
         // if init block and time do not match, do iterative search for the correct block

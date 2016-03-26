@@ -62,7 +62,7 @@ namespace xmreg
     remove_trailing_path_separator(const bf::path& in_path);
 
     string
-    timestamp_to_str(time_t timestamp, const char* format = "%F %T %Z");
+    timestamp_to_str(time_t timestamp, const char* format = "%F %T");
 
 
     string
