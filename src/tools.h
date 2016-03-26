@@ -62,7 +62,7 @@ namespace xmreg
     remove_trailing_path_separator(const bf::path& in_path);
 
     string
-    timestamp_to_str(time_t timestamp, const char* format = "%F %T");
+    timestamp_to_str(time_t timestamp, const char* format = "%F %T %Z");
 
 
     string
@@ -91,7 +91,8 @@ namespace xmreg
     uint64_t
     estimate_bc_height(const string& date, const char* format = "%Y-%m-%d");
 
-
+    time_t
+    to_time_t(pt::ptime t);
 
 }
 

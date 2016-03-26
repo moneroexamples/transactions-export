@@ -109,6 +109,109 @@ namespace xmreg
 
 
 
+
+    /**
+     * Finds the first block created in a given day, e.g., 2015-05-22
+     *
+     *
+     */
+    bool
+    MicroCore::get_block_by_date(const string& date, /* searched date */
+                                 block& blk, /* block to be returned */
+                                 uint64_t init_height, /* start looking from this height */
+                                 const char* format)
+    {
+
+        // get the current blockchain height.
+        uint64_t max_height = m_blockchain_storage.get_current_blockchain_height();
+
+        // first parse the string date into boost's ptime object
+        dateparser parser {format};
+
+        if (!parser(date))
+        {
+            throw runtime_error(string("Date format is incorrect: ") + date);
+        }
+
+        // change the requested date ptime into timestamp
+        uint64_t searched_timestamp = static_cast<uint64_t>(xmreg::to_time_t(parser.pt));
+
+        //cout << "searched_timestamp: " << searched_timestamp << endl;
+
+        // get block at initial guest height
+        block tmp_blk;
+
+        if (!get_block_by_height(init_height, tmp_blk))
+        {
+           cerr << "Cant find block of height " << init_height << endl;
+           return false;
+        }
+
+        // assume the initall block is correct
+        blk = tmp_blk;
+
+        // get timestiamp of the initial block
+        //cout << tmp_blk.timestamp  << ", " << searched_timestamp << endl;
+
+        // if init block and time do not match, do iterative search for the correct block
+
+        // if found init block was earlier than the search time, iterate increasing block heigths
+        if (tmp_blk.timestamp < searched_timestamp)
+        {
+            for (uint64_t i = init_height + 1; i < max_height; ++i)
+            {
+                block tmp_blk2;
+                if (!get_block_by_height(i, tmp_blk2))
+                {
+                    cerr << "Cant find block of height " << i << endl;
+                    return false;
+                }
+
+                //cout << tmp_blk2.timestamp - searched_timestamp << endl;
+
+                if (tmp_blk2.timestamp >= searched_timestamp)
+                {
+
+                    // take one before this one:
+
+                    if (!get_block_by_height(--i, tmp_blk2))
+                    {
+                        cerr << "Cant find block of height " << i << endl;
+                        return false;
+                    }
+
+                    blk = tmp_blk2;
+                    break;
+                }
+
+            }
+        }
+        else
+        {
+            for (uint64_t i = init_height - 1; i >= 0; --i)
+            {
+                block tmp_blk2;
+                if (!get_block_by_height(i, tmp_blk2))
+                {
+                    cerr << "Cant find block of height " << i << endl;
+                    return false;
+                }
+
+                //cout << tmp_blk2.timestamp - searched_timestamp << endl;
+
+                if (tmp_blk2.timestamp <= searched_timestamp)
+                {
+                    blk = tmp_blk2;
+                    break;
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+
     /**
      * Get transaction tx from the blockchain using it hash
      */

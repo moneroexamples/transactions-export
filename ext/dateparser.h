@@ -1,5 +1,5 @@
 //
-// Created by marcin on 22/11/15.
+// Created by mwo on 22/11/15.
 //
 
 #ifndef XMR2CSV_DATEPARSER_H

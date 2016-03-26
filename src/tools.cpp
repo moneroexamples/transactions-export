@@ -141,6 +141,23 @@ namespace xmreg
     timestamp_to_str(time_t timestamp, const char* format)
     {
 
+        // set UTC time zone
+
+        // copy current timezone setting
+
+        char old_tz[64];
+        char *tz_org = getenv("TZ");
+
+        if (tz_org != 0)
+        {
+            strcpy(old_tz, tz_org);
+        }
+
+        // set new timezone
+        std::string tz = "TZ=Coordinated Universal Time";
+        putenv(const_cast<char *>(tz.c_str()));
+        tzset(); // Initialize timezone data
+
         const int TIME_LENGTH = 60;
 
         char str_buff[TIME_LENGTH];
@@ -151,6 +168,14 @@ namespace xmreg
         size_t len;
 
         len = std::strftime(str_buff, TIME_LENGTH, format, tm_ptr);
+
+
+        // set timezone to orginal value
+        if (tz_org != 0)
+        {
+            setenv("TZ", old_tz, 1);
+            tzset();
+        }
 
         return string(str_buff, len);
     }
@@ -282,5 +307,14 @@ namespace xmreg
         return static_cast<uint64_t>(td.total_seconds()) / MONERO_BLOCK_TIME;
     }
 
+
+    time_t
+    to_time_t(pt::ptime t)
+    {
+        using namespace boost::posix_time;
+        ptime epoch(boost::gregorian::date(1970,1,1));
+        time_duration::sec_type x = (t - epoch).total_seconds();
+        return time_t(x);
+    }
 
 }

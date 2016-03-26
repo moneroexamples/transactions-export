@@ -49,7 +49,6 @@ int main(int ac, const char* av[]) {
     auto testnet_opt      = opts.get_option<bool>("testnet");
 
 
-
     // get the program command line options, or
     // some default values for quick check
     string address_str   = address_opt ? *address_opt : "48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU";
@@ -70,18 +69,6 @@ int main(int ac, const char* av[]) {
     }
 
     cout << "Blockchain path: " << blockchain_path << endl;
-
-
-    try
-    {
-        // estimate blockchain height from the start date provided
-        start_height = xmreg::estimate_bc_height(start_date);
-    }
-    catch (const exception& e)
-    {
-        cerr << e.what() << endl;
-        return 1;
-    }
 
 
     // enable basic monero log output
@@ -112,35 +99,66 @@ int main(int ac, const char* av[]) {
     }
 
 
-    cout << "Current blockchain height: " << height <<"\n"
-         << "Requested start date: " << start_date << "\n"
-         << "Estimate height: " << start_height << endl;
+    cout << "Requested time: " << start_date << endl;
 
-    if (start_height > height)
+
+    try
     {
-        cerr << "start height is higher than current height: "
-             << start_height << " vs " << height << endl;
+        // estimate blockchain height from the start date provided
+        start_height = xmreg::estimate_bc_height(start_date);
+
+        cryptonote::block blk;
+
+        if (!mcore.get_block_by_height(start_height, blk))
+        {
+            cerr << "Cant get block by date: " << start_date << endl;
+            return 1;
+        }
+
+        cout << "Guest block time: "
+                << blk.timestamp << " "
+                << xmreg::timestamp_to_str(blk.timestamp)
+                << endl;
+
+
+    }
+    catch (const exception& e)
+    {
+        cerr << e.what() << endl;
         return 1;
     }
 
 
 
+
+
+
     // get block of based on the start_height
-    // and disply its timestamp so that we can
+    // and display its timestamp so that we can
     // see how far in the past are we, or
     // how roughly the height was estimated from
     // the given date.
     cryptonote::block blk;
 
-    if (!mcore.get_block_by_height(start_height, blk))
+    if (!mcore.get_block_by_date(start_date, blk, start_height))
     {
-        cerr << "Cant get block of height: " << start_height << endl;
+        cerr << "Cant get block by date: " << start_date << endl;
         return 1;
     }
 
+
+    uint64_t blk_height = cryptonote::get_block_height(blk);
+
+
     cout << "Actual block time: "
+         << blk.timestamp << " "
          << xmreg::timestamp_to_str(blk.timestamp)
          << endl;
+
+    cout << "Block height: " << blk_height << endl;
+
+
+    return 0;
 
 
     // parse string representing given monero address
