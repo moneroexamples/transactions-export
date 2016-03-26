@@ -159,7 +159,7 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << td.tx_hash();
     ostm << td.m_internal_output_index;
     ostm << td.out_pub_key;
-    ostm << static_cast<double>(td.amount())/12;
+    ostm << cryptonote::print_money(td.amount());
 
     return ostm;
 }
