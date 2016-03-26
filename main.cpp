@@ -197,8 +197,8 @@ int main(int ac, const char* av[]) {
 
     // write the header
     csv_os << "Data" << "Time" << " Block_no"
-           << "Tx_hash" << "Out_idx"
-           << "Output_pub_key" << "Amount"
+           << "Tx_hash" << "Out_idx" << "Amount"
+           << "Output_pub_key"
            << NEWLINE;
 
     // show command line output for every i-th block
