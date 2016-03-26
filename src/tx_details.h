@@ -12,6 +12,8 @@
 #include "monero_headers.h"
 #include "tools.h"
 
+#include <iomanip>
+
 namespace xmreg
 {
 
@@ -26,8 +28,8 @@ namespace xmreg
         uint64_t m_block_timestamp;
         transaction m_tx;
         size_t m_internal_output_index;
+        public_key out_pub_key;
         bool m_spent;
-
 
         crypto::hash tx_hash() const;
 

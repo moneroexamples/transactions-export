@@ -70,6 +70,21 @@ int main(int ac, const char* av[]) {
     print("Blockchain path: {:s}\n", blockchain_path);
 
 
+    // change timezone to Universtal time zone
+    char old_tz[128];
+    const char *tz_org = getenv("TZ");
+
+    if (tz_org)
+    {
+        strcpy(old_tz, tz_org);
+    }
+
+    // set new timezone
+    std::string tz = "TZ=Coordinated Universal Time";
+    putenv(const_cast<char *>(tz.c_str()));
+    tzset(); // Initialize timezone data
+
+
     // enable basic monero log output
     xmreg::enable_monero_log();
 
@@ -182,7 +197,9 @@ int main(int ac, const char* av[]) {
 
     // write the header
     csv_os << "Data" << "Time" << " Block_no"
-           << "Tx_hash" << "Out_num"<< "Amount" << NEWLINE;
+           << "Tx_hash" << "Out_idx"
+           << "Output_pub_key" << "Amount"
+           << NEWLINE;
 
     // show command line output for every i-th block
     uint64_t EVERY_ith_BLOCK {2000};
@@ -192,9 +209,8 @@ int main(int ac, const char* av[]) {
         EVERY_ith_BLOCK = height / 10;
     }
 
-    for (uint64_t i = start_height; i < height; ++i) {
-
-
+    for (uint64_t i = start_height; i < height; ++i)
+    {
         cryptonote::block blk;
 
         try
@@ -259,6 +275,14 @@ int main(int ac, const char* av[]) {
 
     csv_os.flush();
     csv_os.close();
+
+
+    // set timezone to orginal value
+    if (tz_org != 0)
+    {
+        setenv("TZ", old_tz, 1);
+        tzset();
+    }
 
     cout << "\nCsv saved as: " << out_csv_file << endl;
 

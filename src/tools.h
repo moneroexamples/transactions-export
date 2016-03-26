@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+
 /**
  * Some helper functions used in the example.
  * Names are rather self-explanatory, so I think

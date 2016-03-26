@@ -31,6 +31,7 @@ namespace xmreg
            << " time: "    << timestamp_to_str(td.m_block_timestamp)
            << " tx hash: " << td.tx_hash()
            << " out idx: " << td.m_internal_output_index
+           << " out pk:  " << td.out_pub_key
            << " amount: "  << print_money(td.amount());
 
         return os;
@@ -134,7 +135,9 @@ namespace xmreg
                 our_outputs.push_back(
                         xmreg::transfer_details {block_height,
                                                  blk.timestamp,
-                                                 tx, i, false}
+                                                 tx, i,
+                                                 tx_out_to_key.key,
+                                                 false}
                 );
             }
         }
@@ -155,7 +158,8 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << td.m_block_height;
     ostm << td.tx_hash();
     ostm << td.m_internal_output_index;
-    ostm << cryptonote::print_money(td.amount());
+    ostm << td.out_pub_key;
+    ostm << static_cast<double>(td.amount())/12;
 
     return ostm;
 }

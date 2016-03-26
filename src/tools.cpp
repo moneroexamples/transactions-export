@@ -4,6 +4,7 @@
 
 #include "tools.h"
 
+#include <stdlib.h>
 
 
 namespace xmreg
@@ -145,20 +146,20 @@ namespace xmreg
 
         // copy current timezone setting
 
-        char old_tz[64];
-        char *tz_org = getenv("TZ");
+//        char old_tz[128];
+//        const char *tz_org = getenv("TZ");
+//
+//        if (tz_org)
+//        {
+//            strcpy(old_tz, tz_org);
+//        }
 
-        if (tz_org != 0)
-        {
-            strcpy(old_tz, tz_org);
-        }
+//        // set new timezone
+//        std::string tz = "TZ=Coordinated Universal Time";
+//        putenv(const_cast<char *>(tz.c_str()));
+//        tzset(); // Initialize timezone data
 
-        // set new timezone
-        std::string tz = "TZ=Coordinated Universal Time";
-        putenv(const_cast<char *>(tz.c_str()));
-        tzset(); // Initialize timezone data
-
-        const int TIME_LENGTH = 60;
+        const int TIME_LENGTH = 128;
 
         char str_buff[TIME_LENGTH];
 
@@ -170,12 +171,12 @@ namespace xmreg
         len = std::strftime(str_buff, TIME_LENGTH, format, tm_ptr);
 
 
-        // set timezone to orginal value
-        if (tz_org != 0)
-        {
-            setenv("TZ", old_tz, 1);
-            tzset();
-        }
+//        // set timezone to orginal value
+//        if (tz_org != 0)
+//        {
+//            setenv("TZ", old_tz, 1);
+//            tzset();
+//        }
 
         return string(str_buff, len);
     }
