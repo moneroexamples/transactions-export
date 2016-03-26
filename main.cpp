@@ -207,12 +207,14 @@ int main(int ac, const char* av[]) {
             continue;
         }
 
+        string blk_time = xmreg::timestamp_to_str(blk.timestamp);
+
         // show every nth output, just to give
         // a console some break
         if (i % EVERY_ith_BLOCK == 0)
         {
             print("Analysing block {:08d}/{:08d} - date {:s}\n",
-                  i, height, xmreg::timestamp_to_str(blk.timestamp));
+                  i, height, blk_time);
         }
 
         // get all transactions in the block found
@@ -224,7 +226,9 @@ int main(int ac, const char* av[]) {
         if (!mcore.get_core().get_transactions(blk.tx_hashes, txs, missed_txs))
         {
             cerr << "Cant find transcations in block: " << height << endl;
-            return false;
+            csv_os.flush();
+            csv_os.close();
+            return 1;
         }
 
         for (const cryptonote::transaction& tx : txs)
@@ -237,8 +241,8 @@ int main(int ac, const char* av[]) {
 
             if (!found_outputs.empty())
             {
-                print(" - found {:02d} outputs in block {:08d} - writing to the csv\n",
-                      found_outputs.size(), i);
+                print(" - found {:02d} outputs in block {:08d} ({:s}) - writing to the csv\n",
+                      found_outputs.size(), i, blk_time);
 
                 // save found transfers to the csv file
                 for (const auto& tr_details: found_outputs)
