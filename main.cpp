@@ -51,9 +51,9 @@ int main(int ac, const char* av[]) {
     // get the program command line options, or
     // some default values for quick check
     string address_str  = address_opt ? *address_opt
-                          : "41vEA7Ye8Bpeda6g59v5t46koWrVn2PNgEKgzquJjmiKCFTsh9gajr8J3pad49rqu581TAtFGCH9CYTCkYrCpuWUG9GkgeB";
+                          : "43A7NUmo5HbhJoSKbw9bRWW4u2b8dNfhKheTR5zxoRwQ7bULK5TgUQeAvPS5EVNLAJYZRQYqXCmhdf26zG2Has35SpiF1FP";
     string viewkey_str  = viewkey_opt ? *viewkey_opt
-                          : "fed77158ec692fe9eb951f6aeb22c3bda16fe8926c1aac13a5651a9c27f34309";
+                          : "9c2edec7636da3fbb343931d6c3d6e11bcd8042ff7e11de98a8d364f31976c04";
     string spendkey_str = spendkey_opt ? *spendkey_opt
                           : "";
     size_t start_height = start_height_opt ? *start_height_opt : 0;
@@ -292,7 +292,7 @@ int main(int ac, const char* av[]) {
 
         if (!mcore.get_core().get_transactions(blk.tx_hashes, txs, missed_txs))
         {
-            cerr << "Cant find transcations in block: " << height << endl;
+            cerr << "Cant find transactions in block: " << height << endl;
             csv_os.flush();
             csv_os.close();
             return 1;
@@ -306,6 +306,9 @@ int main(int ac, const char* av[]) {
             vector<xmreg::transfer_details> found_outputs
                     = xmreg::get_belonging_outputs(blk, tx, prv_view_key,
                                                    address.m_spend_public_key, i);
+
+            // get tx public key from extras field
+            crypto::public_key pub_tx_key = cryptonote::get_tx_pub_key_from_extra(tx);
 
             if (!found_outputs.empty())
             {
@@ -338,7 +341,7 @@ int main(int ac, const char* av[]) {
                     // that we want.
                     crypto::key_derivation derivation;
 
-                    if (!generate_key_derivation(tr_details.out_pub_key, prv_view_key, derivation))
+                    if (!generate_key_derivation(pub_tx_key, prv_view_key, derivation))
                     {
                         cerr << "Cant get derived key for output with: " << "\n"
                              << "pub_tx_key: " << prv_view_key << endl;
@@ -358,6 +361,8 @@ int main(int ac, const char* av[]) {
                              << tr_details.out_pub_key << endl;
                         return 1;
                     }
+
+                    cout <<  " - key image: " << key_img << endl;
 
                     key_images_gen.push_back(key_img);
 
