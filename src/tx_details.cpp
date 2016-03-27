@@ -153,13 +153,25 @@ csv::ofstream&
 operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
 {
 
+    std::stringstream ss;
+
+    // get strings to remove "<" and ">" from begining and end of hashes
+    ss << td.tx_hash();
+    std::string tx_hash_str = ss.str();
+
+    ss.str(std::string());
+
+    // get strings to remove "<" and ">" from begining and end of keys
+    ss << td.out_pub_key;
+    std::string out_pk_str = ss.str();
+
     ostm << xmreg::timestamp_to_str(td.m_block_timestamp, "%F");
     ostm << xmreg::timestamp_to_str(td.m_block_timestamp, "%T");
     ostm << td.m_block_height;
-    ostm << td.tx_hash();
+    ostm << tx_hash_str.substr(1, tx_hash_str.length()-2);
     ostm << td.m_internal_output_index;
     ostm << cryptonote::print_money(td.amount());
-    ostm << td.out_pub_key;
+    ostm << out_pk_str.substr(1, out_pk_str.length()-2);
 
     return ostm;
 }

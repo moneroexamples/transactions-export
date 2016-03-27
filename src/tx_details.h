@@ -13,6 +13,7 @@
 #include "tools.h"
 
 #include <iomanip>
+#include <sstream>
 
 namespace xmreg
 {
