@@ -25,6 +25,8 @@ namespace xmreg
                  "monero address string")
                 ("viewkey,v", value<string>(),
                  "private view key string")
+                ("spendkey,s", value<string>(),
+                 "private spend key string")
                 ("start-height,t", value<size_t>(),
                  "start from given height")
                 ("start-date,d", value<string>(),

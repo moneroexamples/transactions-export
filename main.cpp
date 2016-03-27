@@ -40,6 +40,7 @@ int main(int ac, const char* av[]) {
     // get other options
     auto address_opt      = opts.get_option<string>("address");
     auto viewkey_opt      = opts.get_option<string>("viewkey");
+    auto spendkey_opt     = opts.get_option<string>("spendkey");
     auto start_height_opt = opts.get_option<size_t>("start-height");
     auto start_date_opt   = opts.get_option<string>("start-date");
     auto out_csv_file_opt = opts.get_option<string>("out-csv-file");
@@ -49,14 +50,25 @@ int main(int ac, const char* av[]) {
 
     // get the program command line options, or
     // some default values for quick check
-    string address_str   = address_opt ? *address_opt : "48daf1rG3hE1Txapcsxh6WXNe9MLNKtu7W7tKTivtSoVLHErYzvdcpea2nSTgGkz66RFP4GKVAsTV14v6G3oddBTHfxP6tU";
-    string viewkey_str   = viewkey_opt ? *viewkey_opt : "1ddabaa51cea5f6d9068728dc08c7ffaefe39a7a4b5f39fa8a976ecbe2cb520a";
-    size_t start_height  = start_height_opt ? *start_height_opt : 0;
-    string start_date    = start_date_opt ? *start_date_opt : "1970-01-01";
-    string out_csv_file  = out_csv_file_opt ? *out_csv_file_opt : "/tmp/xmr_incomming.csv";
-    bool testnet         = *testnet_opt ;
+    string address_str  = address_opt ? *address_opt
+                          : "43A7NUmo5HbhJoSKbw9bRWW4u2b8dNfhKheTR5zxoRwQ7bULK5TgUQeAvPS5EVNLAJYZRQYqXCmhdf26zG2Has35SpiF1FP";
+    string viewkey_str  = viewkey_opt ? *viewkey_opt
+                          : "9c2edec7636da3fbb343931d6c3d6e11bcd8042ff7e11de98a8d364f31976c04";
+    string spendkey_str = spendkey_opt ? *spendkey_opt
+                          : "";
+    size_t start_height = start_height_opt ? *start_height_opt : 0;
+    string start_date   = start_date_opt ? *start_date_opt : "1970-01-01";
+    string out_csv_file = out_csv_file_opt ? *out_csv_file_opt : "/tmp/xmr_incomming.csv";
+    bool testnet        = *testnet_opt ;
 
-    cout << testnet << endl;
+
+    bool SPEND_KEY_GIVEN {false};
+
+    if (!spendkey_str.empty())
+    {
+        SPEND_KEY_GIVEN = true;
+    }
+
 
     path blockchain_path;
 
@@ -180,12 +192,41 @@ int main(int ac, const char* av[]) {
         return 1;
     }
 
+    crypto::secret_key prv_spend_key;
+
+    // parse string representing given private spend
+    if (SPEND_KEY_GIVEN && !xmreg::parse_str_secret_key(spendkey_str, prv_spend_key))
+    {
+        cerr << "Cant parse spend key: " << spendkey_str << endl;
+        return 1;
+    }
+
+    cryptonote::account_keys account_keys;
+
+    if (SPEND_KEY_GIVEN)
+    {
+        // set account keys values
+        account_keys.m_account_address  = address;
+        account_keys.m_spend_secret_key = prv_spend_key;
+        account_keys.m_view_secret_key  = prv_view_key;
+    }
+
 
     // lets check our keys
     cout << "\n"
          << "address          : <" << xmreg::print_address(address, testnet) << ">\n"
-         << "private view key : "  << prv_view_key << "\n"
-         << endl;
+         << "private view key : "  << prv_view_key << "\n";
+
+    if (SPEND_KEY_GIVEN)
+    {
+        cout << "private spend key: " << prv_spend_key << "\n";
+    }
+    else
+    {
+        cout << "private spend key: " << "not given" << "\n";
+    }
+
+    cout << endl;
 
 
     csv::ofstream csv_os {out_csv_file.c_str()};
@@ -196,7 +237,7 @@ int main(int ac, const char* av[]) {
         return 1;
     }
 
-    // write the header
+    // write the header of the csv file to be created
     csv_os << "Data" << "Time" << " Block_no"
            << "Tx_hash" << "Out_idx" << "Amount"
            << "Output_pub_key"
@@ -209,6 +250,15 @@ int main(int ac, const char* av[]) {
     {
         EVERY_ith_BLOCK = height / 10;
     }
+
+    // to check which inputs our ours, we need
+    // to compare inputs's key image with our key_images.
+    // our key_images are generated from our outputs and private spend_key.
+    // thus while we search for our inputs, we are going to generate key_images
+    // for each found input as we go and key them in a vector.
+    // this way, checking which input is ours, is as
+    // simple as veryfing if a given key_image exist in our vector.
+    vector<crypto::key_image> key_images_gen;
 
     for (uint64_t i = start_height; i < height; ++i)
     {
@@ -265,7 +315,49 @@ int main(int ac, const char* av[]) {
                 for (const auto& tr_details: found_outputs)
                 {
                     csv_os << tr_details << NEWLINE;
+
+
+                    //
+                    // the output datails are saved in csv, so now, lets
+                    // generate its_key images using our private spend key
+                    // and save it in global vector key_images_gen
+
+
+                    // public tx key is combined with our private view key
+                    // to create, so called, derived key.
+                    // the derived key is used to produce the key_image
+                    // that we want.
+                    crypto::key_derivation derivation;
+
+//                    if (!generate_key_derivation(tr_details.out_pub_key, prv_view_key, derivation))
+//                    {
+//                        cerr << "Cant get derived key for output with: " << "\n"
+//                             << "pub_tx_key: " << prv_view_key << endl;
+//                        return 1;
+//                    }
+//
+//                    // generate key_image of this output
+//                    crypto::key_image key_img;
+//
+//                    if (!xmreg::generate_key_image(derivation,
+//                                                   tr_details.m_internal_output_index, /* positoin in the tx */
+//                                                   private_spend_key,
+//                                                   account_keys.m_account_address.m_spend_public_key,
+//                                                   key_img))
+//                    {
+//                        cerr << "Cant generate key image for output: "
+//                             << tr_details.out_pub_key << endl;
+//                        return 1;
+//                    }
+//
+//                    key_images_gen.push_back(key_img);
+
                 }
+
+
+
+
+
             }
 
         }
