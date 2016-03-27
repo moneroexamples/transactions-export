@@ -173,6 +173,7 @@ int main(int ac, const char* av[]) {
 
     // parse string representing given private viewkey
     crypto::secret_key prv_view_key;
+
     if (!xmreg::parse_str_secret_key(viewkey_str, prv_view_key))
     {
         cerr << "Cant parse view key: " << viewkey_str << endl;
@@ -260,12 +261,11 @@ int main(int ac, const char* av[]) {
                 print(" - found {:02d} outputs in block {:08d} ({:s}) - writing to the csv\n",
                       found_outputs.size(), i, blk_time);
 
-                // save found transfers to the csv file
+                // save found our outputs to the csv file
                 for (const auto& tr_details: found_outputs)
                 {
                     csv_os << tr_details << NEWLINE;
                 }
-
             }
 
         }

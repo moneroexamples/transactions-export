@@ -183,7 +183,7 @@ namespace xmreg
 
 
     /*
-     * Generate key_image of foran ith output
+     * Generate key_image of for an ith output
      */
     bool
     generate_key_image(const crypto::key_derivation& derivation,

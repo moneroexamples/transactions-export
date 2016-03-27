@@ -48,9 +48,6 @@ namespace xmreg
                           const secret_key& private_view_key,
                           const public_key& public_spend_key,
                           uint64_t block_height = 0);
-
-
-
 }
 
 template<>
