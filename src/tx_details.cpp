@@ -68,6 +68,15 @@ namespace xmreg
         }
 
 
+
+        // get tx payment id
+        crypto::hash payment_id;
+
+        if (!xmreg::get_payment_id(tx, payment_id))
+        {
+            payment_id = cryptonote::null_hash;
+        }
+
         // get the total number of outputs in a transaction.
         size_t output_no = tx.vout.size();
 
@@ -136,7 +145,9 @@ namespace xmreg
                 our_outputs.push_back(
                         xmreg::transfer_details {block_height,
                                                  blk.timestamp,
-                                                 tx, i,
+                                                 tx,
+                                                 payment_id,
+                                                 i,
                                                  tx_out_to_key.key,
                                                  key_image{},
                                                  false}
@@ -145,6 +156,80 @@ namespace xmreg
         }
 
         return our_outputs;
+    }
+
+
+
+
+    bool
+    get_payment_id(const transaction& tx,
+                   const account_public_address& addr,
+                   crypto::hash& payment_id)
+    {
+
+        payment_id = null_hash;
+
+        //crypto::secret_key secret_key = get_tx_pub_key_from_extra(tx);
+
+        std::vector<tx_extra_field> tx_extra_fields;
+
+        if(!parse_tx_extra(tx.extra, tx_extra_fields))
+        {
+            return false;
+        }
+
+        tx_extra_nonce extra_nonce;
+
+        if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce))
+        {
+//            crypto::hash8 payment_id8 = null_hash8;
+//
+//            if(get_encrypted_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id8))
+//            {
+//                if (decrypt_payment_id(payment_id8, addr.m_view_public_key, ptx.tx_key))
+//                {
+//                    memcpy(payment_id.data, payment_id8.data, 8);
+//                }
+//            }
+//            else if (!get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id))
+//            {
+//                payment_id = cryptonote::null_hash;
+//            }
+
+            if (!get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool
+    get_payment_id(const transaction& tx,
+                   crypto::hash& payment_id)
+    {
+
+        payment_id = null_hash;
+
+        //crypto::secret_key secret_key = get_tx_pub_key_from_extra(tx);
+
+        std::vector<tx_extra_field> tx_extra_fields;
+
+        if(!parse_tx_extra(tx.extra, tx_extra_fields))
+        {
+            return false;
+        }
+
+        tx_extra_nonce extra_nonce;
+
+        if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce))
+        {
+            if (!get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -163,6 +248,12 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
 
     ss.str(std::string());
 
+    // get strings to remove "<" and ">" from begining and end of hashes
+    ss << td.payment_id;
+    std::string payment_id_str = ss.str();
+
+    ss.str(std::string());
+
     // get strings to remove "<" and ">" from begining and end of keys
     ss << td.out_pub_key;
     std::string out_pk_str = ss.str();
@@ -178,10 +269,12 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << xmreg::timestamp_to_str(td.m_block_timestamp, "%T");
     ostm << td.m_block_height;
     ostm << tx_hash_str.substr(1, tx_hash_str.length()-2);
+    ostm << payment_id_str.substr(1, tx_hash_str.length()-2);
     ostm << td.m_internal_output_index;
     ostm << cryptonote::print_money(td.amount());
     ostm << out_pk_str.substr(1, out_pk_str.length()-2);
     ostm << key_img.substr(1, out_pk_str.length()-2);
+    ostm << td.m_spent;
 
     return ostm;
 }

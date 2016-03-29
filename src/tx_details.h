@@ -28,6 +28,7 @@ namespace xmreg
         uint64_t m_block_height;
         uint64_t m_block_timestamp;
         transaction m_tx;
+        crypto::hash payment_id;
         size_t m_internal_output_index;
         public_key out_pub_key;
         key_image key_img;
@@ -49,6 +50,17 @@ namespace xmreg
                           const secret_key& private_view_key,
                           const public_key& public_spend_key,
                           uint64_t block_height = 0);
+
+
+    bool
+    get_payment_id(const transaction& tx,
+                   const account_public_address& addr,
+                   crypto::hash& payment_id);
+
+    bool
+    get_payment_id(const transaction& tx,
+                   crypto::hash& payment_id);
+
 }
 
 template<>

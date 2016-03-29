@@ -239,8 +239,9 @@ int main(int ac, const char* av[]) {
 
     // write the header of the csv file to be created
     csv_os << "Data" << "Time" << " Block_no"
-           << "Tx_hash" << "Out_idx" << "Amount"
+           << "Tx_hash" << "Payment_id" << "Out_idx" << "Amount"
            << "Output_pub_key" << "Output_key_img"
+           << "Output_spend"
            << NEWLINE;
 
     // show command line output for every i-th block
@@ -310,6 +311,7 @@ int main(int ac, const char* av[]) {
             // get tx public key from extras field
             crypto::public_key pub_tx_key = cryptonote::get_tx_pub_key_from_extra(tx);
 
+
             if (!found_outputs.empty())
             {
                 print(" - found {:02d} outputs in block {:08d} ({:s}) - writing to the csv\n",
@@ -351,11 +353,17 @@ int main(int ac, const char* av[]) {
                             return 1;
                         }
 
+                        cout << " - output pub key: " << tr_details.out_pub_key << endl;
                         cout << " - key image: " << key_img << endl;
 
                         key_images_gen.push_back(key_img);
 
+                        // copy key_image to tr_details to be saved
                         tr_details.key_img = key_img;
+
+                        // check if output was spent
+                        tr_details.m_spent = core_storage.have_tx_keyimg_as_spent(key_img);
+
                     }
 
                     csv_os << tr_details << NEWLINE;
