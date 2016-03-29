@@ -319,7 +319,7 @@ int main(int ac, const char* av[]) {
                 for (auto& tr_details: found_outputs)
                 {
 
-                    if (!SPEND_KEY_GIVEN)
+                    if (SPEND_KEY_GIVEN)
                     {
 
                         // before output details are saved in csv,  lets
@@ -335,7 +335,7 @@ int main(int ac, const char* av[]) {
 
                         if (!generate_key_derivation(pub_tx_key, prv_view_key, derivation)) {
                             cerr << "Cant get derived key for output with: " << "\n"
-                            << "pub_tx_key: " << prv_view_key << endl;
+                                 << "pub_tx_key: " << prv_view_key << endl;
                             return 1;
                         }
 
@@ -348,7 +348,7 @@ int main(int ac, const char* av[]) {
                                                        account_keys.m_account_address.m_spend_public_key,
                                                        key_img)) {
                             cerr << "Cant generate key image for output: "
-                            << tr_details.out_pub_key << endl;
+                                 << tr_details.out_pub_key << endl;
                             return 1;
                         }
 
