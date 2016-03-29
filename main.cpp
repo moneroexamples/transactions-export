@@ -321,7 +321,6 @@ int main(int ac, const char* av[]) {
 
                     if (SPEND_KEY_GIVEN)
                     {
-
                         // before output details are saved in csv,  lets
                         // generate its key image using our private spend key (if given)
                         // and save it in global vector key_images_gen
