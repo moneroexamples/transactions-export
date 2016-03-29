@@ -30,6 +30,7 @@ namespace xmreg
         transaction m_tx;
         size_t m_internal_output_index;
         public_key out_pub_key;
+        key_image key_img;
         bool m_spent;
 
         crypto::hash tx_hash() const;

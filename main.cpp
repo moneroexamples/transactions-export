@@ -58,7 +58,7 @@ int main(int ac, const char* av[]) {
                           : "";
     size_t start_height = start_height_opt ? *start_height_opt : 0;
     string start_date   = start_date_opt ? *start_date_opt : "1970-01-01";
-    string out_csv_file = out_csv_file_opt ? *out_csv_file_opt : "/tmp/xmr_incomming.csv";
+    string out_csv_file = out_csv_file_opt ? *out_csv_file_opt : "./xmr_report.csv";
     bool testnet        = *testnet_opt ;
 
 
@@ -240,7 +240,7 @@ int main(int ac, const char* av[]) {
     // write the header of the csv file to be created
     csv_os << "Data" << "Time" << " Block_no"
            << "Tx_hash" << "Out_idx" << "Amount"
-           << "Output_pub_key"
+           << "Output_pub_key" << "Output_key_img"
            << NEWLINE;
 
     // show command line output for every i-th block
@@ -316,55 +316,50 @@ int main(int ac, const char* av[]) {
                       found_outputs.size(), i, blk_time);
 
                 // save found our outputs to the csv file
-                for (const auto& tr_details: found_outputs)
+                for (auto& tr_details: found_outputs)
                 {
-                    csv_os << tr_details << NEWLINE;
 
                     if (!SPEND_KEY_GIVEN)
                     {
-                        // if spend key not given, we cant check
-                        // which inputs our ours. so skeep the rest
-                        // of this for loop, i.e., we cant generate
-                        // our key images
-                        continue;
+
+                        // before output details are saved in csv,  lets
+                        // generate its key image using our private spend key (if given)
+                        // and save it in global vector key_images_gen
+                        // the key_image generated is saved in the csv file
+
+                        // public tx key is combined with our private view key
+                        // to create, so called, derived key.
+                        // the derived key is used to produce the key_image
+                        // that we want.
+                        crypto::key_derivation derivation;
+
+                        if (!generate_key_derivation(pub_tx_key, prv_view_key, derivation)) {
+                            cerr << "Cant get derived key for output with: " << "\n"
+                            << "pub_tx_key: " << prv_view_key << endl;
+                            return 1;
+                        }
+
+                        // generate key_image of this output
+                        crypto::key_image key_img;
+
+                        if (!xmreg::generate_key_image(derivation,
+                                                       tr_details.m_internal_output_index, /* position in the tx */
+                                                       prv_spend_key,
+                                                       account_keys.m_account_address.m_spend_public_key,
+                                                       key_img)) {
+                            cerr << "Cant generate key image for output: "
+                            << tr_details.out_pub_key << endl;
+                            return 1;
+                        }
+
+                        cout << " - key image: " << key_img << endl;
+
+                        key_images_gen.push_back(key_img);
+
+                        tr_details.key_img = key_img;
                     }
 
-                    //
-                    // the output details are saved in csv, so now, lets
-                    // generate its_key images using our private spend key
-                    // and save it in global vector key_images_gen
-
-
-                    // public tx key is combined with our private view key
-                    // to create, so called, derived key.
-                    // the derived key is used to produce the key_image
-                    // that we want.
-                    crypto::key_derivation derivation;
-
-                    if (!generate_key_derivation(pub_tx_key, prv_view_key, derivation))
-                    {
-                        cerr << "Cant get derived key for output with: " << "\n"
-                             << "pub_tx_key: " << prv_view_key << endl;
-                        return 1;
-                    }
-
-                    // generate key_image of this output
-                    crypto::key_image key_img;
-
-                    if (!xmreg::generate_key_image(derivation,
-                                                   tr_details.m_internal_output_index, /* position in the tx */
-                                                   prv_spend_key,
-                                                   account_keys.m_account_address.m_spend_public_key,
-                                                   key_img))
-                    {
-                        cerr << "Cant generate key image for output: "
-                             << tr_details.out_pub_key << endl;
-                        return 1;
-                    }
-
-                    cout <<  " - key image: " << key_img << endl;
-
-                    key_images_gen.push_back(key_img);
+                    csv_os << tr_details << NEWLINE;
 
                 } // for (const auto& tr_details: found_outputs)
 
