@@ -101,22 +101,21 @@ int main(int ac, const char* av[]) {
     xmreg::enable_monero_log();
 
     // create instance of our MicroCore
+    // and make pointer to the Blockchain
     xmreg::MicroCore mcore;
+    cryptonote::Blockchain* core_storage;
 
-    // initialize the core using the blockchain path
-    if (!mcore.init(blockchain_path.string()))
+    // initialize mcore and core_storage
+    if (!xmreg::init_blockchain(blockchain_path.string(),
+                                mcore, core_storage))
     {
         cerr << "Error accessing blockchain." << endl;
-        return 1;
+        return EXIT_FAILURE;
     }
-
-    // get the high level cryptonote::Blockchain object to interact
-    // with the blockchain lmdb database
-    cryptonote::Blockchain& core_storage = mcore.get_core();
 
     // get the current blockchain height. Just to check
     // if it reads ok.
-    uint64_t height = core_storage.get_current_blockchain_height();
+    uint64_t height = core_storage->get_current_blockchain_height();
 
     if (start_height > height)
     {
@@ -267,7 +266,7 @@ int main(int ac, const char* av[]) {
 
         try
         {
-            blk = core_storage.get_db().get_block_from_height(i);
+            blk = core_storage->get_db().get_block_from_height(i);
         }
         catch (std::exception& e)
         {
@@ -362,7 +361,7 @@ int main(int ac, const char* av[]) {
                         tr_details.key_img = key_img;
 
                         // check if output was spent
-                        tr_details.m_spent = core_storage.have_tx_keyimg_as_spent(key_img);
+                        tr_details.m_spent = core_storage->have_tx_keyimg_as_spent(key_img);
 
                     }
 
