@@ -72,10 +72,10 @@ int main(int ac, const char* av[]) {
 
     path blockchain_path;
 
-    if (!xmreg::get_blockchain_path(bc_path_opt, blockchain_path))
+    if (!xmreg::get_blockchain_path(bc_path_opt, blockchain_path, testnet))
     {
-        // if problem obtaining blockchain path, finish.
-        return 1;
+        cerr << "Error getting blockchain path." << endl;
+        return EXIT_FAILURE;
     }
 
 
