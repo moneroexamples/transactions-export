@@ -20,8 +20,49 @@ namespace xmreg
     uint64_t
     transfer_details::amount() const
     {
-        return m_tx.vout[m_internal_output_index].amount;
+        uint64_t xmr_amount = m_tx.vout[m_internal_output_index].amount;
+
+        return xmr_amount;
     }
+
+
+    uint64_t
+    transfer_details::amount(secret_key prv_view_key) const
+    {
+        uint64_t xmr_amount = m_tx.vout[m_internal_output_index].amount;
+
+        // cointbase txs have amounts in plain sight.
+        // so use amount from ringct, only for non-coinbase txs
+        if (m_tx.version > 1 && !is_coinbase(m_tx))
+        {
+            uint64_t rct_amount = 0;
+
+            bool r;
+
+            public_key addr_pub_view_key = m_addr.m_view_public_key;
+
+            uint64_t out_idx = m_internal_output_index;
+
+            rct::key mask = m_tx.rct_signatures.ecdhInfo[out_idx].mask;
+
+            r = decode_ringct(m_tx.rct_signatures,
+                              get_tx_pub_key_from_extra(m_tx),
+                              prv_view_key,
+                              out_idx,
+                              mask,
+                              rct_amount);
+
+            if (!r)
+            {
+                cerr << "Cant decode ringCT!" << endl;
+            }
+
+            xmr_amount = rct_amount;
+        }
+
+        return xmr_amount;
+    }
+
 
 
     ostream&
@@ -49,8 +90,8 @@ namespace xmreg
     vector<xmreg::transfer_details>
     get_belonging_outputs(const block& blk,
                           const transaction& tx,
+                          const account_public_address& addr,
                           const secret_key& private_view_key,
-                          const public_key& public_spend_key,
                           uint64_t block_height)
     {
         // vector to be returned
@@ -126,25 +167,29 @@ namespace xmreg
 
             derive_public_key(derivation,
                               i,
-                              public_spend_key,
+                              addr.m_spend_public_key,
                               pubkey);
 
             // get tx output public key
             const txout_to_key tx_out_to_key
                     = boost::get<txout_to_key>(tx.vout[i].target);
 
+            // check if generated public key matches the current output's key
+            bool mine_output = (tx_out_to_key.key == pubkey);
 
-            //cout << "Output no: " << i << ", " << tx_out_to_key.key;
+
 
             // check if the output's public key is ours
-            if (tx_out_to_key.key == pubkey)
+            if (mine_output)
             {
                 // if so, then add this output to the
                 // returned vector
                 //our_outputs.push_back(tx.vout[i]);
                 our_outputs.push_back(
-                        xmreg::transfer_details {block_height,
+                        xmreg::transfer_details {addr,
+                                                 block_height,
                                                  blk.timestamp,
+                                                 tx.vout[i].amount,
                                                  tx,
                                                  payment_id,
                                                  i,
@@ -152,6 +197,11 @@ namespace xmreg
                                                  key_image{},
                                                  false}
                 );
+
+                xmreg::transfer_details& last =  our_outputs.back();
+
+                last.m_amount = last.amount(private_view_key);
+
             }
         }
 
@@ -271,7 +321,7 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << tx_hash_str.substr(1, tx_hash_str.length()-2);
     ostm << payment_id_str.substr(1, tx_hash_str.length()-2);
     ostm << td.m_internal_output_index;
-    ostm << cryptonote::print_money(td.amount());
+    ostm << cryptonote::print_money(td.m_amount);
     ostm << out_pk_str.substr(1, out_pk_str.length()-2);
     ostm << key_img.substr(1, out_pk_str.length()-2);
     ostm << td.m_spent;

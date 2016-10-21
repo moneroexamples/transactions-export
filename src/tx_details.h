@@ -25,8 +25,10 @@ namespace xmreg
 
     struct transfer_details
     {
+        account_public_address m_addr;
         uint64_t m_block_height;
         uint64_t m_block_timestamp;
+        uint64_t m_amount;
         transaction m_tx;
         crypto::hash payment_id;
         size_t m_internal_output_index;
@@ -37,6 +39,8 @@ namespace xmreg
         crypto::hash tx_hash() const;
 
         uint64_t amount() const;
+
+        uint64_t amount(secret_key prv_view_key) const;
     };
 
 
@@ -47,8 +51,8 @@ namespace xmreg
     vector<xmreg::transfer_details>
     get_belonging_outputs(const block& blk,
                           const transaction& tx,
+                          const account_public_address& addr,
                           const secret_key& private_view_key,
-                          const public_key& public_spend_key,
                           uint64_t block_height = 0);
 
 

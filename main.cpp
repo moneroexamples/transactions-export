@@ -304,8 +304,8 @@ int main(int ac, const char* av[]) {
             crypto::hash tx_hash = cryptonote::get_transaction_hash(tx);
 
             vector<xmreg::transfer_details> found_outputs
-                    = xmreg::get_belonging_outputs(blk, tx, prv_view_key,
-                                                   address.m_spend_public_key, i);
+                    = xmreg::get_belonging_outputs(blk, tx, address,
+                                                   prv_view_key, i);
 
             // get tx public key from extras field
             crypto::public_key pub_tx_key = cryptonote::get_tx_pub_key_from_extra(tx);
@@ -362,8 +362,7 @@ int main(int ac, const char* av[]) {
 
                         // check if output was spent
                         tr_details.m_spent = core_storage->have_tx_keyimg_as_spent(key_img);
-
-                    }
+                      }
 
                     csv_os << tr_details << NEWLINE;
 
@@ -412,6 +411,8 @@ int main(int ac, const char* av[]) {
                           tx_in_to_key.k_image);
 
                 //cout << "Input no: " << ii << ", " << tx_in_to_key.k_image;
+
+                uint64_t xmr_amount = tx_in_to_key.amount;
 
                 if (it != key_images_gen.end())
                 {
