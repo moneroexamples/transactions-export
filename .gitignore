@@ -2,3 +2,4 @@
 .sass-cache
 *.*~
 .idea/
+cmake-build-debug/

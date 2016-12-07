@@ -19,9 +19,20 @@ The Monero C++ development environment was set as shown in the above link.
 ## C++ code
 The main part of the example is main.cpp.
 
+Assuming Monero headers and libraries set up as shown here: 
+
+- https://github.com/moneroexamples/compile-monero-09-on-ubuntu-16-04
+
+```bash
+git clone https://github.com/moneroexamples/compile-monero-09-on-ubuntu-16-04.git
+cd transactions-export
+mkdir build && cd build
+cmake ..
+```
 
 
 
+## How to compile
 
 
 
