@@ -32,11 +32,13 @@ namespace xmreg
                 ("start-date,d", value<string>(),
                  "start roughly from given date: yyyy-mm-dd")
                 ("out-csv-file,c", value<string>(),
-                 "private view key string")
+                 "name of outputs csv file")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain")
                 ("testnet",  value<bool>()->default_value(false)->implicit_value(true),
-                 "is the address from testnet network");
+                 "is the address from testnet network")
+                ("all-outputs",  value<bool>()->default_value(false)->implicit_value(true),
+                 "output all outputs, whether they are ours or not");
 
 
         store(command_line_parser(acc, avv)

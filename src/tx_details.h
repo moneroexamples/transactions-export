@@ -38,6 +38,8 @@ namespace xmreg
 
         crypto::hash tx_hash() const;
 
+        public_key tx_pub_key() const;
+
         uint64_t amount() const;
 
         uint64_t amount(secret_key prv_view_key) const;
@@ -55,6 +57,11 @@ namespace xmreg
                           const secret_key& private_view_key,
                           uint64_t block_height = 0);
 
+
+    vector<xmreg::transfer_details>
+    get_outputs(const block& blk,
+                const transaction& tx,
+                uint64_t block_height = 0);
 
     bool
     get_payment_id(const transaction& tx,

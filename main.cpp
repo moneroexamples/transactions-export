@@ -46,6 +46,7 @@ int main(int ac, const char* av[]) {
     auto out_csv_file_opt = opts.get_option<string>("out-csv-file");
     auto bc_path_opt      = opts.get_option<string>("bc-path");
     auto testnet_opt      = opts.get_option<bool>("testnet");
+    auto all_outputs_opt  = opts.get_option<bool>("all-outputs");
 
 
     // get the program command line options, or
@@ -60,6 +61,7 @@ int main(int ac, const char* av[]) {
     string start_date   = start_date_opt ? *start_date_opt : "1970-01-01";
     string out_csv_file = out_csv_file_opt ? *out_csv_file_opt : "./xmr_report.csv";
     bool testnet        = *testnet_opt ;
+    bool all_outputs    = *all_outputs_opt;
 
 
     bool SPEND_KEY_GIVEN {false};
@@ -238,7 +240,8 @@ int main(int ac, const char* av[]) {
 
     // write the header of the csv file to be created
     csv_os << "Data" << "Time" << " Block_no"
-           << "Tx_hash" << "Payment_id" << "Out_idx" << "Amount"
+           << "Tx_hash" << "Tx_public_key"
+           << "Payment_id" << "Out_idx" << "Amount"
            << "Output_pub_key" << "Output_key_img"
            << "Output_spend"
            << NEWLINE;
@@ -303,9 +306,19 @@ int main(int ac, const char* av[]) {
 
             crypto::hash tx_hash = cryptonote::get_transaction_hash(tx);
 
-            vector<xmreg::transfer_details> found_outputs
-                    = xmreg::get_belonging_outputs(blk, tx, address,
-                                                   prv_view_key, i);
+            vector<xmreg::transfer_details> found_outputs;
+
+            if (all_outputs == false)
+            {
+                // outout only our outputs
+                found_outputs = xmreg::get_belonging_outputs(
+                        blk, tx, address, prv_view_key, i);
+            }
+            else
+            {
+                found_outputs = xmreg::get_outputs(blk, tx, i);
+            }
+
 
             // get tx public key from extras field
             crypto::public_key pub_tx_key = cryptonote::get_tx_pub_key_from_extra(tx);
@@ -362,9 +375,11 @@ int main(int ac, const char* av[]) {
 
                         // check if output was spent
                         tr_details.m_spent = core_storage->have_tx_keyimg_as_spent(key_img);
-                      }
 
-                    csv_os << tr_details << NEWLINE;
+                      } // if (SPEND_KEY_GIVEN)
+
+
+                      csv_os << tr_details << NEWLINE;
 
                 } // for (const auto& tr_details: found_outputs)
 

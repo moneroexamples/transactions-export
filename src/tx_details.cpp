@@ -17,6 +17,13 @@ namespace xmreg
     };
 
 
+    public_key
+    transfer_details::tx_pub_key() const
+    {
+        return get_tx_pub_key_from_extra(m_tx);
+    };
+
+
     uint64_t
     transfer_details::amount() const
     {
@@ -68,13 +75,14 @@ namespace xmreg
     ostream&
     operator<<(ostream& os, const transfer_details& td)
     {
-        os << "Block: "     << td.m_block_height
-           << " time: "     << timestamp_to_str(td.m_block_timestamp)
-           << " tx hash: "  << td.tx_hash()
-           << " out idx: "  << td.m_internal_output_index
-           << " out pk:  "  << td.out_pub_key
-           << " key img:  " << td.key_img
-           << " amount: "   << print_money(td.amount());
+        os << "Block: "        << td.m_block_height
+           << " time: "        << timestamp_to_str(td.m_block_timestamp)
+           << " tx hash: "     << td.tx_hash()
+           << " tx pub key: "  << td.tx_pub_key()
+           << " out idx: "     << td.m_internal_output_index
+           << " out pk:  "     << td.out_pub_key
+           << " key img:  "    << td.key_img
+           << " amount: "      << print_money(td.amount());
 
         return os;
     }
@@ -210,6 +218,88 @@ namespace xmreg
 
 
 
+    /**
+     * Get tx outputs associated with the given private view and public spend keys
+     *
+     *
+     */
+    vector<xmreg::transfer_details>
+    get_outputs(const block& blk,
+                          const transaction& tx,
+                          uint64_t block_height)
+    {
+        // vector to be returned
+        vector<xmreg::transfer_details> our_outputs;
+
+
+        // get transaction's public key
+        public_key pub_tx_key = get_tx_pub_key_from_extra(tx);
+
+        // check if transaction has valid public key
+        // if no, then skip
+        if (pub_tx_key == null_pkey)
+        {
+            return our_outputs;
+        }
+
+
+
+        // get tx payment id
+        crypto::hash payment_id;
+
+        if (!xmreg::get_payment_id(tx, payment_id))
+        {
+            payment_id = cryptonote::null_hash;
+        }
+
+        // get the total number of outputs in a transaction.
+        size_t output_no = tx.vout.size();
+
+        // check if the given transaction has any outputs
+        // if no, then finish
+        if (output_no == 0)
+        {
+            return our_outputs;
+        }
+
+
+
+        // sum amount of xmr sent to us
+        // in the given transaction
+        uint64_t money_transfered {0};
+
+        // loop through outputs in the given tx
+        // to check which outputs our ours. we compare outputs'
+        // public keys with the public key that would had been
+        // generated for us if we had gotten the outputs.
+        // not sure this is the case though, but that's my understanding.
+        for (size_t i = 0; i < output_no; ++i)
+        {
+
+            // get tx output public key
+            const txout_to_key tx_out_to_key
+                    = boost::get<txout_to_key>(tx.vout[i].target);
+
+            // if so, then add this output to the
+            // returned vector
+            //our_outputs.push_back(tx.vout[i]);
+            our_outputs.push_back(
+                    xmreg::transfer_details {account_public_address(),
+                                             block_height,
+                                             blk.timestamp,
+                                             tx.vout[i].amount,
+                                             tx,
+                                             payment_id,
+                                             i,
+                                             tx_out_to_key.key,
+                                             key_image{},
+                                             false}
+            );
+        }
+
+        return our_outputs;
+    }
+
 
     bool
     get_payment_id(const transaction& tx,
@@ -298,6 +388,12 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
 
     ss.str(std::string());
 
+    // get tx pub key str
+    ss << td.tx_pub_key();
+    std::string tx_pub_key_str = ss.str();
+
+    ss.str(std::string());
+
     // get strings to remove "<" and ">" from begining and end of hashes
     ss << td.payment_id;
     std::string payment_id_str = ss.str();
@@ -319,6 +415,7 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << xmreg::timestamp_to_str(td.m_block_timestamp, "%T");
     ostm << td.m_block_height;
     ostm << tx_hash_str.substr(1, tx_hash_str.length()-2);
+    ostm << tx_pub_key_str.substr(1, tx_hash_str.length()-2);
     ostm << payment_id_str.substr(1, tx_hash_str.length()-2);
     ostm << td.m_internal_output_index;
     ostm << cryptonote::print_money(td.m_amount);
