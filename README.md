@@ -211,7 +211,7 @@ for (uint64_t i = start_height; i < height; ++i)
     } // for (const cryptonote::transaction& tx : txs)
 
 } // for (uint64_t i = 0; i < height; ++i)
-'''
+```
 
 
 ## How to compile
@@ -247,6 +247,10 @@ cmake .
 make
 ```
 
+The Monero C++ development environment was set as shown in the following link:
+- [Ubuntu 16.04 x86_64](https://github.com/moneroexamples/compile-monero-09-on-ubuntu-16-04/)
+
+
 ## Program options
 ```bash
 [mwo@arch cmake-build-debug]$ ./xmr2csv -h
@@ -263,9 +267,6 @@ xmr2csv, export all your transactions into csv file:
   --all-outputs [=arg(=1)] (=0) output all outputs, whether they are ours or 
                                 not
 ```
-
-The Monero C++ development environment was set as shown in the following link:
-- [Ubuntu 16.04 x86_64](https://github.com/moneroexamples/compile-monero-09-on-ubuntu-16-04/)
 
 ## How can you help?
 
