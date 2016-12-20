@@ -247,9 +247,6 @@ cmake .
 make
 ```
 
-The Monero C++ development environment was set as shown in the following link:
-- [Ubuntu 16.04 x86_64](https://github.com/moneroexamples/compile-monero-09-on-ubuntu-16-04/)
-
 
 ## Program options
 ```bash
