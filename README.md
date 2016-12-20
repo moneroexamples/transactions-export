@@ -19,7 +19,7 @@ The Monero C++ development environment was set as shown in the above link.
 
 Only main loop from `main.cpp` shown.
 
-'''c++
+```c++
     // to check which inputs our ours, we need
     // to compare inputs's key image with our key_images.
     // our key_images are generated from our outputs and private spend_key.
