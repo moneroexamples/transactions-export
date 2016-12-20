@@ -265,6 +265,24 @@ xmr2csv, export all your transactions into csv file:
                                 not
 ```
 
+## Testing address and viewkey
+
+For testing of the viewer, one can use [official address and viewkey](https://github.com/monero-project/bitmonero#supporting-the-project)
+of the Monero, i.e.,
+
+- Address: 44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A
+- Viewkey: f359631075708155cc3d92a32b75a7d02a5dcf27756707b47a2b31b21c389501
+
+Monero [forum donation](https://www.reddit.com/r/Monero/comments/5j2rm7/in_last_four_weekes_there_were_about_850_xmr/dbdmzt7/?context=3),
+
+- Address: 45ttEikQEZWN1m7VxaVN9rjQkpSdmpGZ82GwUps66neQ1PqbQMno4wMY8F5jiDt2GoHzCtMwa7PDPJUJYb1GYrMP4CwAwNp
+- Viewkey: c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c
+
+[Old Monero donation](https://github.com/monero-project/monero/pull/714/files) address:
+
+- Address: 46BeWrHpwXmHDpDEUmZBWZfoQpdc6HaERCNmx1pEYL2rAcuwufPN9rXHHtyUA4QVy66qeFQkn6sfK8aHYjA3jk3o1Bv16em 
+- Viewkey: e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703
+
 ## How can you help?
 
 Constructive criticism, code and website edits are always good. They can be made through github.
