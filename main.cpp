@@ -321,7 +321,7 @@ int main(int ac, const char* av[]) {
 
 
             // get tx public key from extras field
-            crypto::public_key pub_tx_key = cryptonote::get_tx_pub_key_from_extra(tx);
+            crypto::public_key pub_tx_key = xmreg::get_tx_pub_key_from_received_outs(tx);
 
 
             if (!found_outputs.empty())

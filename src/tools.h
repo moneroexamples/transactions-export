@@ -240,6 +240,10 @@ namespace xmreg
     time_t
     to_time_t(pt::ptime t);
 
+    // based on
+    // crypto::public_key wallet2::get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const
+    public_key
+    get_tx_pub_key_from_received_outs(const transaction &tx);
 }
 
 #endif //XMREG01_TOOLS_H
