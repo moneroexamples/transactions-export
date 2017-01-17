@@ -14,16 +14,6 @@ using boost::filesystem::path;
 using namespace fmt;
 using namespace std;
 
-
-// without this it wont work. I'm not sure what it does.
-// it has something to do with locking the blockchain and tx pool
-// during certain operations to avoid deadlocks.
-
-namespace epee {
-    unsigned int g_test_dbg_lock_sleep = 0;
-}
-
-
 int main(int ac, const char* av[]) {
 
     // get command line options
@@ -99,8 +89,9 @@ int main(int ac, const char* av[]) {
     tzset(); // Initialize timezone data
 
 
-    // enable basic monero log output
-    xmreg::enable_monero_log();
+    // set monero log output level
+    uint32_t log_level = 0;
+    mlog_configure("", true);
 
     // create instance of our MicroCore
     // and make pointer to the Blockchain

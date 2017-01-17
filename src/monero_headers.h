@@ -12,9 +12,6 @@
 #define UNSIGNED_TX_PREFIX "Monero unsigned tx set\001"
 #define SIGNED_TX_PREFIX "Monero signed tx set\001"
 
-
-#include "net/http_base.h"
-#include "net/http_server_handlers_map2.h"
 #include "net/http_client.h"
 #include "storages/http_abstract_invoke.h"
 
@@ -30,6 +27,8 @@
 #include "ringct/rctTypes.h"
 #include "ringct/rctOps.h"
 #include "ringct/rctSigs.h"
+
+#include "easylogging++.h"
 
 #include "common/base58.h"
 

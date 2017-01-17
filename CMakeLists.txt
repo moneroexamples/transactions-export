@@ -41,6 +41,7 @@ include_directories(
         ${MONERO_HEADERS_DIR}/src
         ${MONERO_HEADERS_DIR}/external
         ${MONERO_HEADERS_DIR}/contrib/epee/include
+        ${MONERO_HEADERS_DIR}/external/easylogging++
         ${MONERO_HEADERS_DIR}/external/db_drivers/liblmdb)
 
 
@@ -68,6 +69,10 @@ set_property(TARGET cryptonote_protocol
 add_library(blockchain_db STATIC IMPORTED)
 set_property(TARGET blockchain_db
         PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libblockchain_db.a)
+
+add_library(epee STATIC IMPORTED)
+set_property(TARGET epee
+        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libepee.a)
 
 add_library(lmdb STATIC IMPORTED)
 set_property(TARGET lmdb
@@ -110,6 +115,7 @@ target_link_libraries(${PROJECT_NAME}
         lmdb
         ringct
         common
+        epee
         ${Boost_LIBRARIES}
         pthread
         unbound

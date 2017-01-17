@@ -173,15 +173,6 @@ namespace xmreg
                    crypto::hash& payment_id,
                    crypto::hash8& payment_id8);
 
-
-    inline void
-    enable_monero_log() {
-        uint32_t log_level = 0;
-        epee::log_space::get_set_log_detalisation_level(true, log_level);
-        epee::log_space::log_singletone::add_logger(LOGGER_CONSOLE, NULL, NULL);
-    }
-
-
     uint64_t
     estimate_bc_height(const string& date, const char* format = "%Y-%m-%d");
 
