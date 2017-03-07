@@ -54,9 +54,13 @@ set_property(TARGET common PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libcomm
 add_library(blocks STATIC IMPORTED)
 set_property(TARGET blocks PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libblocks.a)
 
-add_library(crypto STATIC IMPORTED)
-set_property(TARGET crypto
+add_library(cryptoxmr STATIC IMPORTED)
+set_property(TARGET cryptoxmr
         PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libcrypto.a)
+
+add_library(cryptonote_basic STATIC IMPORTED)
+set_property(TARGET cryptonote_basic
+        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libcryptonote_basic.a)
 
 add_library(cryptonote_core STATIC IMPORTED)
 set_property(TARGET cryptonote_core
@@ -107,15 +111,17 @@ target_link_libraries(${PROJECT_NAME}
         myxrm
         myext
         wallet
+        blockchain_db
         cryptonote_core
         cryptonote_protocol
-        blockchain_db
-        crypto
+        cryptonote_basic
+        cryptoxmr
         blocks
         lmdb
         ringct
         common
         epee
+        crypto
         ${Boost_LIBRARIES}
         pthread
         unbound
