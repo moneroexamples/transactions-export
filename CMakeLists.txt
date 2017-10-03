@@ -8,8 +8,32 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(CMAKE_INSTALL_PREFIX
-        /opt/bitmonero/)
+
+if (NOT MONERO_DIR)
+    set(MONERO_DIR ~/monero)
+endif()
+
+message(STATUS MONERO_DIR ": ${MONERO_DIR}")
+
+set(MONERO_SOURCE_DIR ${MONERO_DIR}
+        CACHE PATH "Path to the root directory for Monero")
+
+# set location of monero build tree
+set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/release/
+        CACHE PATH "Path to the build directory for Monero")
+
+set(MY_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}/cmake"
+        CACHE PATH "The path to the cmake directory of the current project")
+
+list(APPEND CMAKE_MODULE_PATH "${MY_CMAKE_DIR}")
+
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${MONERO_BUILD_DIR}"
+        CACHE PATH "Add Monero directory for library searching")
+
+include(MyUtils)
+
+find_package(Monero)
+
 
 # find boost
 find_package(Boost COMPONENTS
@@ -28,68 +52,6 @@ find_package(Boost COMPONENTS
 include_directories(${Boost_INCLUDE_DIRS})
 
 
-# set location of monero static libraries
-set(MONERO_LIBS_DIR
-        /opt/monero-dev/libs)
-
-# set location of moneroheaders
-set(MONERO_HEADERS_DIR
-        /opt/monero-dev/headers)
-
-# include monero headers
-include_directories(
-        ${MONERO_HEADERS_DIR}/src
-        ${MONERO_HEADERS_DIR}/external
-        ${MONERO_HEADERS_DIR}/contrib/epee/include
-        ${MONERO_HEADERS_DIR}/external/easylogging++
-        ${MONERO_HEADERS_DIR}/external/db_drivers/liblmdb)
-
-
-
-# get individual monero static libraries
-# that are needed in this project
-add_library(common STATIC IMPORTED)
-set_property(TARGET common PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libcommon.a)
-
-add_library(blocks STATIC IMPORTED)
-set_property(TARGET blocks PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libblocks.a)
-
-add_library(cryptoxmr STATIC IMPORTED)
-set_property(TARGET cryptoxmr
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libcrypto.a)
-
-add_library(cryptonote_basic STATIC IMPORTED)
-set_property(TARGET cryptonote_basic
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libcryptonote_basic.a)
-
-add_library(cryptonote_core STATIC IMPORTED)
-set_property(TARGET cryptonote_core
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libcryptonote_core.a)
-
-add_library(cryptonote_protocol STATIC IMPORTED)
-set_property(TARGET cryptonote_protocol
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libcryptonote_protocol.a)
-
-add_library(blockchain_db STATIC IMPORTED)
-set_property(TARGET blockchain_db
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libblockchain_db.a)
-
-add_library(epee STATIC IMPORTED)
-set_property(TARGET epee
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libepee.a)
-
-add_library(lmdb STATIC IMPORTED)
-set_property(TARGET lmdb
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/liblmdb.a)
-
-add_library(ringct STATIC IMPORTED)
-set_property(TARGET ringct
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libringct.a)
-
-add_library(wallet STATIC IMPORTED)
-set_property(TARGET wallet
-        PROPERTY IMPORTED_LOCATION ${MONERO_LIBS_DIR}/libwallet.a)
-
 # add src/ subfolder
 add_subdirectory(ext/)
 
@@ -105,9 +67,8 @@ add_executable(${PROJECT_NAME}
         ${SOURCE_FILES})
 
 
-# link our exexutable xmreg01 against
-# libraries
-target_link_libraries(${PROJECT_NAME}
+
+set(LIBRARIES
         myxrm
         myext
         wallet
@@ -115,18 +76,41 @@ target_link_libraries(${PROJECT_NAME}
         cryptonote_core
         cryptonote_protocol
         cryptonote_basic
-        cryptoxmr
+        daemonizer
+        cncrypto
         blocks
         lmdb
         ringct
         common
+        mnemonics
         epee
-        crypto
+        easylogging
         ${Boost_LIBRARIES}
         pthread
         unbound
-        unwind
-        dl)
+        curl
+        crypto
+        ssl)
 
-install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+if(APPLE)
+    set(LIBRARIES ${LIBRARIES} "-framework IOKit")
+else()
+    set(LIBRARIES ${LIBRARIES} atomic)
+endif()
+
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT WIN32)
+    set(LIBRARIES ${LIBRARIES} unwind)
+endif()
+
+if (WIN32)
+    set(LIBRARIES ${LIBRARIES}
+            wsock32
+            ntdll
+            ws2_32
+            Iphlpapi
+            )
+else()
+    set(LIBRARIES ${LIBRARIES} dl)
+endif()
+
+target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
