@@ -301,7 +301,7 @@ int main(int ac, const char* av[]) {
 
             if (all_outputs == false)
             {
-                // outout only our outputs
+                // output only our outputs
                 found_outputs = xmreg::get_belonging_outputs(
                         blk, tx, address, prv_view_key, i);
             }
@@ -419,6 +419,7 @@ int main(int ac, const char* av[]) {
                 //cout << "Input no: " << ii << ", " << tx_in_to_key.k_image;
 
                 uint64_t xmr_amount = tx_in_to_key.amount;
+
 
                 if (it != key_images_gen.end())
                 {

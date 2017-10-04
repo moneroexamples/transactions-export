@@ -107,7 +107,7 @@ namespace xmreg
 
 
         // get transaction's public key
-        public_key pub_tx_key = get_tx_pub_key_from_extra(tx);
+        public_key pub_tx_key = get_tx_pub_key_from_received_outs(tx);
 
         // check if transaction has valid public key
         // if no, then skip
@@ -185,11 +185,43 @@ namespace xmreg
             // check if generated public key matches the current output's key
             bool mine_output = (tx_out_to_key.key == pubkey);
 
-
-
             // check if the output's public key is ours
             if (mine_output)
             {
+                uint64_t xmr_amount = tx.vout[i].amount;
+
+                // if mine output has RingCT, i.e., tx version is 2
+                // need to decode its amount. otherwise its zero.
+                if (mine_output && tx.version > 1)
+                {
+                    // initialize with regular amount value
+                    // for ringct, except coinbase, it will be 0
+                    uint64_t rct_amount_val = xmr_amount;
+
+                    if (!is_coinbase(tx))
+                    {
+                        bool r;
+
+                        rct::key mask = tx.rct_signatures.ecdhInfo[i].mask;
+
+                        r = decode_ringct(tx.rct_signatures,
+                                          pub_tx_key,
+                                          private_view_key,
+                                          i,
+                                          mask,
+                                          rct_amount_val);
+
+                        if (!r) {
+                            cerr << "Cant decode ringCT!" << endl;
+                            throw std::runtime_error("Cant decode ringCT!");
+                        }
+
+                        xmr_amount = rct_amount_val;
+                    }
+
+                }  //  if (mine_output && tx.version > 1)
+
+
                 // if so, then add this output to the
                 // returned vector
                 //our_outputs.push_back(tx.vout[i]);
@@ -197,7 +229,7 @@ namespace xmreg
                         xmreg::transfer_details {addr,
                                                  block_height,
                                                  blk.timestamp,
-                                                 tx.vout[i].amount,
+                                                 xmr_amount,
                                                  tx,
                                                  payment_id,
                                                  i,
@@ -210,8 +242,9 @@ namespace xmreg
 
                 last.m_amount = last.amount(private_view_key);
 
-            }
-        }
+            } // if (mine_output)
+
+        } //  for (size_t i = 0; i < output_no; ++i)
 
         return our_outputs;
     }

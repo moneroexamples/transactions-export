@@ -632,11 +632,11 @@ namespace xmreg
 
     bool
     decode_ringct(const rct::rctSig& rv,
-                  const crypto::public_key pub,
-                  const crypto::secret_key &sec,
+                  const crypto::public_key& pub,
+                  const crypto::secret_key& sec,
                   unsigned int i,
-                  rct::key & mask,
-                  uint64_t & amount)
+                  rct::key& mask,
+                  uint64_t& amount)
     {
         crypto::key_derivation derivation;
 
@@ -796,7 +796,7 @@ namespace xmreg
 
 
     // based on
-// crypto::public_key wallet2::get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const
+    // crypto::public_key wallet2::get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const
     public_key
     get_tx_pub_key_from_received_outs(const transaction &tx)
     {
