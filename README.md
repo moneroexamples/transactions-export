@@ -1,9 +1,12 @@
-# Export our transactions from blockchain into csv file
+# Exporting our transactions from blockchain and searching for ring members into csv files
 
 In this example, it is shown how to export our transactions from the blockchain
 into a csv file. This can be very useful
 for making summaries or reports of our incoming and outgoing (when spend key is given)
  transactions.
+
+Also it shows how we can search in which transactions used our outputs as
+its ring members.
 
 
 
@@ -66,20 +69,25 @@ make
 ```bash
 [mwo@arch cmake-build-debug]$ ./xmr2csv -h
 xmr2csv, export all your transactions into csv file:
-  -h [ --help ] [=arg(=1)] (=0) produce help message
-  -a [ --address ] arg          monero address string
-  -v [ --viewkey ] arg          private view key string
-  -s [ --spendkey ] arg         private spend key string
-  -t [ --start-height ] arg     start from given height
-  -d [ --start-date ] arg       start roughly from given date: yyyy-mm-dd
-  -c [ --out-csv-file ] arg     name of outputs csv file
-  -b [ --bc-path ] arg          path to lmdb blockchain
-  --testnet [=arg(=1)] (=0)     is the address from testnet network
-  --all-outputs [=arg(=1)] (=0) output all outputs, whether they are ours or 
-                                not
+  -h [ --help ] [=arg(=1)] (=0)         produce help message
+  -a [ --address ] arg                  monero address string
+  -v [ --viewkey ] arg                  private view key string
+  -s [ --spendkey ] arg                 private spend key string
+  -t [ --start-height ] arg             start from given height
+  -d [ --start-date ] arg               start roughly from given date:
+                                        yyyy-mm-dd
+  -c [ --out-csv-file ] arg             name of outputs csv file
+  -r [ --out-csv-file2 ] arg            name of outputs csv file for file
+                                        containing  out outputs as ring members
+  -b [ --bc-path ] arg                  path to lmdb blockchain
+  --testnet [=arg(=1)] (=0)             is the address from testnet network
+  -m [ --ring-members ] [=arg(=1)] (=0) search where our outputs are as ring
+                                        members
+  --all-outputs [=arg(=1)] (=0)         output all outputs, whether they are
+                                        ours or not
 ```
 
-## Testing address and viewkey
+## Getting our outputs using address and viewkey
 
 For testing of the viewer, one can use [official address and viewkey](https://github.com/monero-project/bitmonero#supporting-the-project)
 of the Monero, i.e.,
@@ -97,7 +105,7 @@ Monero [forum donation](https://www.reddit.com/r/Monero/comments/5j2rm7/in_last_
 - Viewkey: c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c
 
 ```bash
-./xmr2csv -a ./xmr2csv -a 44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A -v f359631075708155cc3d92a32b75a7d02a5dcf27756707b47a2b31b21c389501 -c ./forum.csv 
+./xmr2csv -a 44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A -v f359631075708155cc3d92a32b75a7d02a5dcf27756707b47a2b31b21c389501 -c ./forum.csv
 ```
 
 [Old Monero donation](https://github.com/monero-project/monero/pull/714/files) address:
@@ -109,6 +117,15 @@ Monero [forum donation](https://www.reddit.com/r/Monero/comments/5j2rm7/in_last_
 ./xmr2csv -a 46BeWrHpwXmHDpDEUmZBWZfoQpdc6HaERCNmx1pEYL2rAcuwufPN9rXHHtyUA4QVy66qeFQkn6sfK8aHYjA3jk3o1Bv16em -v e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703 -c ./old.csv 
 ```
 
+
+## Searching txs which use our outputs as ring members
+
+Just add `-m` flag. This will produce `xmr_report_ring_members.csv` file which
+contains the list of txs which use our outputs.
+
+```bash
+./xmr2csv -m -a 45ttEikQEZWN1m7VxaVN9rjQkpSdmpGZ82GwUps66neQ1PqbQMno4wMY8F5jiDt2GoHzCtMwa7PDPJUJYb1GYrMP4CwAwNp -v c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c -c ./current.csv
+```
 
 ## How can you help?
 

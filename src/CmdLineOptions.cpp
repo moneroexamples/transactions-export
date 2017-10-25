@@ -33,10 +33,14 @@ namespace xmreg
                  "start roughly from given date: yyyy-mm-dd")
                 ("out-csv-file,c", value<string>(),
                  "name of outputs csv file")
+                ("out-csv-file2,r", value<string>(),
+                 "name of outputs csv file for file containing  out outputs as ring members")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain")
                 ("testnet",  value<bool>()->default_value(false)->implicit_value(true),
                  "is the address from testnet network")
+                ("ring-members,m",  value<bool>()->default_value(false)->implicit_value(true),
+                 "search where our outputs are as ring members")
                 ("all-outputs",  value<bool>()->default_value(false)->implicit_value(true),
                  "output all outputs, whether they are ours or not");
 
