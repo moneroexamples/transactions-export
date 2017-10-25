@@ -114,18 +114,22 @@ Monero [forum donation](https://www.reddit.com/r/Monero/comments/5j2rm7/in_last_
 - Viewkey: e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703
 
 ```bash
-./xmr2csv -a 46BeWrHpwXmHDpDEUmZBWZfoQpdc6HaERCNmx1pEYL2rAcuwufPN9rXHHtyUA4QVy66qeFQkn6sfK8aHYjA3jk3o1Bv16em -v e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703 -c ./old.csv 
+./xmr2csv -a 46BeWrHpwXmHDpDEUmZBWZfoQpdc6HaERCNmx1pEYL2rAcuwufPN9rXHHtyUA4QVy66qeFQkn6sfK8aHYjA3jk3o1Bv16em -v e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703 -c ./old.csv
 ```
 
 
-## Searching txs which use our outputs as ring members
+## Searching txs which use our outputs as ring members and their frequency
 
-Just add `-m` flag. This will produce `xmr_report_ring_members.csv` file which
-contains the list of txs which use our outputs.
+Just add `-m` flag. This will produce `xmr_report_ring_members.csv` and `xmr_report_ring_members_frew.csv` files
+ (default names) which
+contain the list of txs which use our outputs, and frequency of outputs use, respectively. To speed up the search
+we can use `-t` flag to specify starting block.
 
 ```bash
-./xmr2csv -m -a 45ttEikQEZWN1m7VxaVN9rjQkpSdmpGZ82GwUps66neQ1PqbQMno4wMY8F5jiDt2GoHzCtMwa7PDPJUJYb1GYrMP4CwAwNp -v c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c -c ./current.csv
+./xmr2csv -t 550000 -m -a 45ttEikQEZWN1m7VxaVN9rjQkpSdmpGZ82GwUps66neQ1PqbQMno4wMY8F5jiDt2GoHzCtMwa7PDPJUJYb1GYrMP4CwAwNp -v c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c
 ```
+
+
 
 ## How can you help?
 

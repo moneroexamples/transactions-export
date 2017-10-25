@@ -36,6 +36,7 @@ int main(int ac, const char* av[]) {
     auto start_date_opt    = opts.get_option<string>("start-date");
     auto out_csv_file_opt  = opts.get_option<string>("out-csv-file");  // for our outputs only
     auto out_csv_file2_opt = opts.get_option<string>("out-csv-file2"); // for our outputs as ring members in other txs
+    auto out_csv_file3_opt = opts.get_option<string>("out-csv-file3"); // for frequency of outputs as ring members in other txs
     auto bc_path_opt       = opts.get_option<string>("bc-path");
     auto testnet_opt       = opts.get_option<bool>("testnet");
     auto ring_members_opt  = opts.get_option<bool>("ring-members");
@@ -52,8 +53,9 @@ int main(int ac, const char* av[]) {
                           : "";
     size_t start_height  = start_height_opt ? *start_height_opt : 0;
     string start_date    = start_date_opt ? *start_date_opt : "1970-01-01";
-    string out_csv_file  = out_csv_file_opt ? *out_csv_file_opt : "./xmr_report.csv";
-    string out_csv_file2 = out_csv_file2_opt ? *out_csv_file2_opt : "./xmr_report_ring_members.csv";
+    string out_csv_file  = *out_csv_file_opt ;
+    string out_csv_file2 = *out_csv_file2_opt ;
+    string out_csv_file3 = *out_csv_file3_opt ;
     bool testnet         = *testnet_opt ;
     bool ring_members    = *ring_members_opt ;
     bool all_outputs     = *all_outputs_opt;
@@ -264,6 +266,12 @@ int main(int ac, const char* av[]) {
     // this will be especially useful to check if our outputs are used in some
     // txs as ring members of other people txs.
     vector<pair<crypto::public_key, uint64_t>> known_outputs_keys;
+
+    // here we store number of times our output was used as ring member
+    // so that at the end of the progrem, we can show most frequently used
+    // outputs.
+    using freq_map_t = pair<crypto::public_key, uint64_t>;
+    unordered_map<freq_map_t::first_type, freq_map_t::second_type> ring_member_frequency;
 
 
     // to check which inputs our ours, we need
@@ -499,6 +507,8 @@ int main(int ac, const char* av[]) {
 
                         // this seems to be our mixin.
 
+                        ring_member_frequency[it->first] += 1;
+
                         cout << " - found output as ring member: " << count << ", " << it->first
                              << ", tx hash: " << tx_hash << '\n';
 
@@ -535,6 +545,48 @@ int main(int ac, const char* av[]) {
     }
 
     cout << "\nCsv saved as: " << out_csv_file << '\n';
+
+
+    if (ring_members)
+    {
+        cout << "\nMost frequent outputs used as ring members are:\n ";
+
+
+
+       vector<freq_map_t> sorted_frequencies(
+               ring_member_frequency.begin(), ring_member_frequency.end());
+
+        std::sort(sorted_frequencies.begin(), sorted_frequencies.end(),
+                  [](freq_map_t const& left, freq_map_t const& right)
+                  {
+                      return left.second > right.second;
+                  });
+
+
+        unique_ptr<csv::ofstream> csv_os3(new csv::ofstream {out_csv_file3.c_str()});
+
+        if (!csv_os3->is_open())
+        {
+            cerr << "Cant open file: " << out_csv_file3 << endl;
+        }
+
+        // write the header of the csv file to be created
+        *csv_os3 << "Output_pub_key" << "Frequency" << NEWLINE;
+
+
+        for (auto& kvp: sorted_frequencies)
+        {
+            cout << " - " << kvp.first << ": " << kvp.second << '\n';
+
+            if  (csv_os3->is_open())
+                *csv_os3<< epee::string_tools::pod_to_hex(kvp.first) << kvp.second << NEWLINE;
+        }
+
+        if (csv_os3->is_open())
+            csv_os3->close();
+
+    }
+
 
     cout << "\nEnd of program." << '\n';
 

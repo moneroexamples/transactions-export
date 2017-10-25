@@ -31,10 +31,12 @@ namespace xmreg
                  "start from given height")
                 ("start-date,d", value<string>(),
                  "start roughly from given date: yyyy-mm-dd")
-                ("out-csv-file,c", value<string>(),
+                ("out-csv-file,c", value<string>()->default_value("xmr_report.csv"),
                  "name of outputs csv file")
-                ("out-csv-file2,r", value<string>(),
+                ("out-csv-file2,r", value<string>()->default_value("xmr_report_ring_members.csv"),
                  "name of outputs csv file for file containing  out outputs as ring members")
+                ("out-csv-file3,r", value<string>()->default_value("xmr_report_ring_members_freq.csv"),
+                 "name of outputs csv file for file containing frequencies of outputs as ring members")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain")
                 ("testnet",  value<bool>()->default_value(false)->implicit_value(true),
