@@ -270,8 +270,8 @@ int main(int ac, const char* av[]) {
     // here we store number of times our output was used as ring member
     // so that at the end of the progrem, we can show most frequently used
     // outputs.
-    using freq_map_t = pair<crypto::public_key, uint64_t>;
-    unordered_map<freq_map_t::first_type, freq_map_t::second_type> ring_member_frequency;
+
+    unordered_map<crypto::public_key, uint64_t> ring_member_frequency;
 
 
     // to check which inputs our ours, we need
@@ -549,43 +549,54 @@ int main(int ac, const char* av[]) {
 
     if (ring_members)
     {
-        cout << "\nMost frequent outputs used as ring members are:\n ";
 
+        // we need to sort the frequencies from most frequent to lease
+        // frequent. For this, <public_key, freq> values from map
+        // are copied to vector, which is then sorted by freq.
+        // since I dont want to kep passing the pairs by value 2 times
+        // (map->vector->sorting), I just keep pointers to map pairs
+        // in vector and operate on the pointers only.
 
+        using map_ptr_t = decltype(ring_member_frequency)::value_type const*;
 
-       vector<freq_map_t> sorted_frequencies(
-               ring_member_frequency.begin(), ring_member_frequency.end());
+        vector<map_ptr_t> sorted_frequencies;
+        sorted_frequencies.reserve(ring_member_frequency.size());
+
+        for (auto const& kvp: ring_member_frequency)
+            sorted_frequencies.push_back(&kvp);
+
 
         std::sort(sorted_frequencies.begin(), sorted_frequencies.end(),
-                  [](freq_map_t const& left, freq_map_t const& right)
+                  [](map_ptr_t const& left, map_ptr_t const&  right)
                   {
-                      return left.second > right.second;
+                      // types look complicated. so 'left' is
+                      // referenece to 'const pointer' which points to 'const map_t'
+                      return left->second > right->second;
                   });
 
 
         unique_ptr<csv::ofstream> csv_os3(new csv::ofstream {out_csv_file3.c_str()});
 
         if (!csv_os3->is_open())
-        {
             cerr << "Cant open file: " << out_csv_file3 << endl;
-        }
 
         // write the header of the csv file to be created
         *csv_os3 << "Output_pub_key" << "Frequency" << NEWLINE;
 
+        cout << "\nMost frequent outputs used as ring members are:\n";
 
-        for (auto& kvp: sorted_frequencies)
+        for (map_ptr_t& kvp: sorted_frequencies)
         {
-            cout << " - " << kvp.first << ": " << kvp.second << '\n';
+            cout << " - " << kvp->first << ": " << kvp->second << '\n';
 
             if  (csv_os3->is_open())
-                *csv_os3<< epee::string_tools::pod_to_hex(kvp.first) << kvp.second << NEWLINE;
+                *csv_os3 << epee::string_tools::pod_to_hex(kvp->first) << kvp->second << NEWLINE;
         }
 
         if (csv_os3->is_open())
             csv_os3->close();
 
-    }
+    } // if (ring_members)
 
 
     cout << "\nEnd of program." << '\n';
