@@ -585,9 +585,13 @@ int main(int ac, const char* av[]) {
 
         cout << "\nMost frequent outputs used as ring members are:\n";
 
+        size_t i {0};
+
         for (map_ptr_t& kvp: sorted_frequencies)
         {
-            cout << " - " << kvp->first << ": " << kvp->second << '\n';
+
+            if (++i < 10) // dont show more than ten. all of them are in output csv.
+                cout << " - " << kvp->first << ": " << kvp->second << '\n';
 
             if  (csv_os3->is_open())
                 *csv_os3 << epee::string_tools::pod_to_hex(kvp->first) << kvp->second << NEWLINE;
