@@ -1,5 +1,5 @@
 //
-// Created by marcin on 5/11/15.
+// Created by mwo on 5/11/15.
 //
 
 #ifndef XMREG01_TOOLS_H
@@ -90,14 +90,14 @@ namespace xmreg
 
     bool
     parse_str_address(const string& address_str,
-                      account_public_address& address,
+                      address_parse_info& address_info,
                       bool testnet = false);
 
     inline bool
     is_separator(char c);
 
     string
-    print_address(const account_public_address& address,
+    print_address(const address_parse_info& address,
                   bool testnet = false);
 
     string
@@ -114,7 +114,7 @@ namespace xmreg
 
 
     ostream&
-    operator<< (ostream& os, const account_public_address& addr);
+    operator<< (ostream& os, const address_parse_info& addr_info);
 
 
     string
@@ -224,9 +224,6 @@ namespace xmreg
 
     map<std::string, std::string>
     parse_crow_post_data(const string& req_body);
-
-    bool
-    get_dummy_account_keys(account_keys& dummy_keys, bool testnet = false);
 
     time_t
     to_time_t(pt::ptime t);

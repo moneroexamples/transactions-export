@@ -85,6 +85,7 @@ set(LIBRARIES
         mnemonics
         epee
         easylogging
+        checkpoints
         ${Boost_LIBRARIES}
         pthread
         unbound

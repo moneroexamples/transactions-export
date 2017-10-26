@@ -168,9 +168,9 @@ int main(int ac, const char* av[]) {
     print("Search for ring members: {:s}\n", (ring_members ? "True" : "False"));
 
     // parse string representing given monero address
-    cryptonote::account_public_address address;
+    cryptonote::address_parse_info address_info;
 
-    if (!xmreg::parse_str_address(address_str,  address, testnet))
+    if (!xmreg::parse_str_address(address_str,  address_info, testnet))
     {
         cerr << "Cant parse string address: " << address_str << '\n';
         return EXIT_FAILURE;
@@ -200,7 +200,7 @@ int main(int ac, const char* av[]) {
     if (SPEND_KEY_GIVEN)
     {
         // set account keys values
-        account_keys.m_account_address  = address;
+        account_keys.m_account_address  = address_info.address;
         account_keys.m_spend_secret_key = prv_spend_key;
         account_keys.m_view_secret_key  = prv_view_key;
     }
@@ -208,7 +208,7 @@ int main(int ac, const char* av[]) {
 
     // lets check our keys
     cout << '\n'
-         << "address          : " << xmreg::print_address(address, testnet) << '\n'
+         << "address          : " << xmreg::print_address(address_info, testnet) << '\n'
          << "private view key : "  << prv_view_key << '\n';
 
     if (SPEND_KEY_GIVEN)
@@ -327,7 +327,7 @@ int main(int ac, const char* av[]) {
             {
                 // output only our outputs
                 found_outputs = xmreg::get_belonging_outputs(
-                        blk, tx, address, prv_view_key, i);
+                        blk, tx, address_info.address, prv_view_key, i);
             }
             else
             {

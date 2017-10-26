@@ -76,11 +76,11 @@ namespace xmreg
      */
     bool
     parse_str_address(const string& address_str,
-                      account_public_address& address,
+                      address_parse_info& address_info,
                       bool testnet)
     {
 
-        if (!get_account_address_from_str(address, testnet, address_str))
+        if (!get_account_address_from_str(address_info, testnet, address_str))
         {
             cerr << "Error getting address: " << address_str << endl;
             return false;
@@ -94,9 +94,11 @@ namespace xmreg
      * Return string representation of monero address
      */
     string
-    print_address(const account_public_address& address, bool testnet)
+    print_address(const address_parse_info& address_info, bool testnet)
     {
-        return "<" + get_account_address_as_str(testnet, address) + ">";
+        return "<" + get_account_address_as_str(
+                testnet, address_info.is_subaddress, address_info.address)
+               + ">";
     }
 
     string
@@ -164,11 +166,12 @@ namespace xmreg
 
 
     ostream&
-    operator<< (ostream& os, const account_public_address& addr)
+    operator<< (ostream& os, const address_parse_info& addr_info)
     {
-        os << get_account_address_as_str(false, addr);
+        os << get_account_address_as_str(false, addr_info.is_subaddress, addr_info.address);
         return os;
     }
+
 
 
     /*
@@ -749,41 +752,6 @@ namespace xmreg
         return body;
     }
 
-    bool
-    get_dummy_account_keys(account_keys& dummy_keys, bool testnet)
-    {
-        secret_key adress_prv_viewkey;
-        secret_key adress_prv_spendkey;
-
-        account_public_address dummy_address;
-
-        if (!get_account_address_from_str(dummy_address,
-                                     testnet,
-                                     "4BAyX63gVQgDqKS1wmqNVHdcCNjq1jooLYCXsKEY9w7VdGh45oZbPLvN7y8oVg2zmnhECkRBXpREWb97KtfAcT6p1UNXm9K"))
-        {
-            return false;
-        }
-
-
-        if (!epee::string_tools::hex_to_pod("f238be69411631f35b76c5a9148b3b7e8327eb41bfd0b396e090aeba40235d01", adress_prv_viewkey))
-        {
-            return false;
-        }
-
-        if (!epee::string_tools::hex_to_pod("5db8e1d2c505f888e54aca15b1a365c8814d7deebc1a246690db3bf71324950d", adress_prv_spendkey))
-        {
-            return false;
-        }
-
-
-        dummy_keys = account_keys {
-                dummy_address,
-                adress_prv_spendkey,
-                adress_prv_viewkey
-        };
-
-        return true;
-    }
 
     time_t
     to_time_t(pt::ptime t)

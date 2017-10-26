@@ -9,9 +9,12 @@
 #define BLOCKCHAIN_DB DB_LMDB
 
 
-#define UNSIGNED_TX_PREFIX "Monero unsigned tx set\001"
-#define SIGNED_TX_PREFIX "Monero signed tx set\001"
-#include "release/version/version.h"
+#define UNSIGNED_TX_PREFIX "Monero unsigned tx set\003"
+#define SIGNED_TX_PREFIX "Monero signed tx set\003"
+#define KEY_IMAGE_EXPORT_FILE_MAGIC "Monero key image export\002"
+#define OUTPUT_EXPORT_FILE_MAGIC "Monero output export\003"
+
+#include "version.h"
 
 #include "net/http_client.h"
 #include "storages/http_abstract_invoke.h"
