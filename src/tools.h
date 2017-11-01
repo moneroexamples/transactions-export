@@ -88,17 +88,8 @@ namespace xmreg
                              const string& hash_str,
                              transaction& tx);
 
-    bool
-    parse_str_address(const string& address_str,
-                      address_parse_info& address_info,
-                      bool testnet = false);
-
     inline bool
     is_separator(char c);
-
-    string
-    print_address(const address_parse_info& address,
-                  bool testnet = false);
 
     string
     print_sig (const signature& sig);
@@ -112,9 +103,11 @@ namespace xmreg
     string
     timestamp_to_str(time_t timestamp, const char* format = "%F %T");
 
+    std::string my_get_account_address_as_str(
+            bool testnet, account_public_address const & adr);
 
-    ostream&
-    operator<< (ostream& os, const address_parse_info& addr_info);
+//    ostream&
+//    operator<< (ostream& os, const address_parse_info& addr_info);
 
 
     string

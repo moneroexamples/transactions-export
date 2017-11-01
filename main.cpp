@@ -9,11 +9,98 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <type_traits>
 
 using boost::filesystem::path;
 
 using namespace fmt;
 using namespace std;
+
+// declare  address_parse_info, for sfinae.
+// if we work with moenro v0.11.0 there is no address_parse_info.
+// but if with work with newer version, there is address_parse_info and we
+// use this to get address;
+namespace cryptonote {
+
+    // just have it declared. Dont need to provide any definitoin
+    // now. we let sfinae to choose the declaration which has definition.
+
+    struct address_parse_info;
+
+    std::string get_account_address_as_str(
+            bool testnet, const account_public_address& adr);
+
+}
+
+template <typename T = cryptonote::address_parse_info>
+struct address_helper
+{
+
+    template <typename Q = T>
+    bool get_account_address_from_str_helper(
+            Q& address, bool testnet, std::string const& address_str)
+    {
+        return get_account_address_from_str(address, testnet, address_str);
+    }
+
+    std::string get_account_address_as_str_helper(
+            bool testnet, bool subaddress,
+            const cryptonote::account_public_address& address)
+    {
+        (void) subaddress;
+        return xmreg::my_get_account_address_as_str(testnet, address);
+    }
+
+    // should be used when cryptonote::address_parse_info is avaliable
+    template <typename Q = T>
+    typename std::enable_if<std::is_constructible<Q>::value, string>::type
+    print_address(Q const& address, bool testnet)
+    {
+        return get_account_address_as_str_helper(testnet,
+                                          false /*assume we only have base address*/,
+                                          address);
+    }
+
+    // should be used when cryptonote::address_parse_info is NOT avaliable
+    template <typename Q = T>
+    typename std::enable_if<!std::is_constructible<Q>::value, string>::type
+    print_address(Q const& address, bool testnet)
+    {
+        return get_account_address_as_str(testnet, address);
+    }
+
+    // should be used when cryptonote::address_parse_info is avaliable
+    template<typename Q = T>
+    typename std::enable_if<std::is_constructible<Q>::value, bool>::type
+    operator()(string const& address_str, bool testnet, cryptonote::account_public_address& addr)
+    {
+        Q address_info;
+
+        if (get_account_address_from_str_helper(address_info, testnet, address_str))
+        {
+            addr = address_info.address;
+        }
+
+        return true;
+    }
+
+    // should be used when cryptonote::address_parse_info is NOT avaliable
+    template<typename Q = T>
+    typename std::enable_if<!std::is_constructible<Q>::value, bool>::type
+    operator()(string const& address_str, bool testnet, cryptonote::account_public_address& addr)
+    {
+        cryptonote::account_public_address address;
+
+        if (get_account_address_from_str_helper(address, testnet, address_str))
+        {
+            addr = address;
+            return true;
+        }
+
+        return false;
+    }
+
+};
 
 int main(int ac, const char* av[]) {
 
@@ -168,9 +255,11 @@ int main(int ac, const char* av[]) {
     print("Search for ring members: {:s}\n", (ring_members ? "True" : "False"));
 
     // parse string representing given monero address
-    cryptonote::address_parse_info address_info;
+    struct address_helper<cryptonote::address_parse_info> get_address;
 
-    if (!xmreg::parse_str_address(address_str,  address_info, testnet))
+    cryptonote::account_public_address address;
+
+    if (!get_address(address_str,  testnet, address))
     {
         cerr << "Cant parse string address: " << address_str << '\n';
         return EXIT_FAILURE;
@@ -200,7 +289,7 @@ int main(int ac, const char* av[]) {
     if (SPEND_KEY_GIVEN)
     {
         // set account keys values
-        account_keys.m_account_address  = address_info.address;
+        account_keys.m_account_address  = address;
         account_keys.m_spend_secret_key = prv_spend_key;
         account_keys.m_view_secret_key  = prv_view_key;
     }
@@ -208,7 +297,7 @@ int main(int ac, const char* av[]) {
 
     // lets check our keys
     cout << '\n'
-         << "address          : " << xmreg::print_address(address_info, testnet) << '\n'
+         << "address          : " << get_address.print_address(address, testnet) << '\n'
          << "private view key : "  << prv_view_key << '\n';
 
     if (SPEND_KEY_GIVEN)
@@ -327,7 +416,7 @@ int main(int ac, const char* av[]) {
             {
                 // output only our outputs
                 found_outputs = xmreg::get_belonging_outputs(
-                        blk, tx, address_info.address, prv_view_key, i);
+                        blk, tx, address, prv_view_key, i);
             }
             else
             {

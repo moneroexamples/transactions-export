@@ -57,6 +57,12 @@ foreach (l ${LIBS})
 
 endforeach()
 
+if(EXISTS "${MONERO_SOURCE_DIR}/build/release/version/version.h")
+	message("setting -DMONERO_VERSION_VERSION flag")
+	add_definitions(-DMONERO_VERSION_VERSION)
+else()
+	message("not setting -DMONERO_VERSION_VERSION flag")
+endif()
 
 message(STATUS ${MONERO_SOURCE_DIR}/build)
 
@@ -67,4 +73,5 @@ include_directories(
 		${MONERO_SOURCE_DIR}/build
 		${MONERO_SOURCE_DIR}/external/easylogging++
 		${MONERO_SOURCE_DIR}/contrib/epee/include
+		${MONERO_SOURCE_DIR}/version
 		${MONERO_SOURCE_DIR}/external/db_drivers/liblmdb)
