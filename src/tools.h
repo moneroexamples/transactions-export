@@ -1,5 +1,5 @@
 //
-// Created by marcin on 5/11/15.
+// Created by mwo on 5/11/15.
 //
 
 #ifndef XMREG01_TOOLS_H
@@ -88,17 +88,8 @@ namespace xmreg
                              const string& hash_str,
                              transaction& tx);
 
-    bool
-    parse_str_address(const string& address_str,
-                      account_public_address& address,
-                      bool testnet = false);
-
     inline bool
     is_separator(char c);
-
-    string
-    print_address(const account_public_address& address,
-                  bool testnet = false);
 
     string
     print_sig (const signature& sig);
@@ -112,9 +103,11 @@ namespace xmreg
     string
     timestamp_to_str(time_t timestamp, const char* format = "%F %T");
 
+    std::string my_get_account_address_as_str(
+            bool testnet, account_public_address const & adr);
 
-    ostream&
-    operator<< (ostream& os, const account_public_address& addr);
+//    ostream&
+//    operator<< (ostream& os, const address_parse_info& addr_info);
 
 
     string
@@ -224,9 +217,6 @@ namespace xmreg
 
     map<std::string, std::string>
     parse_crow_post_data(const string& req_body);
-
-    bool
-    get_dummy_account_keys(account_keys& dummy_keys, bool testnet = false);
 
     time_t
     to_time_t(pt::ptime t);

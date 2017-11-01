@@ -92,11 +92,17 @@ set(LIBRARIES
         crypto
         ssl)
 
+if (Xmr_CHECKPOINTS_LIBRARIES)
+    set(LIBRARIES ${LIBRARIES} checkpoints)
+endif()
+
+
 if(APPLE)
     set(LIBRARIES ${LIBRARIES} "-framework IOKit")
 else()
     set(LIBRARIES ${LIBRARIES} atomic)
 endif()
+
 
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT WIN32)
     set(LIBRARIES ${LIBRARIES} unwind)

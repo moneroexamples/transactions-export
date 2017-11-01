@@ -70,34 +70,7 @@ namespace xmreg
         return true;
     }
 
-    /**
-     * Parse monero address in a string form into
-     * cryptonote::account_public_address object
-     */
-    bool
-    parse_str_address(const string& address_str,
-                      account_public_address& address,
-                      bool testnet)
-    {
 
-        if (!get_account_address_from_str(address, testnet, address_str))
-        {
-            cerr << "Error getting address: " << address_str << endl;
-            return false;
-        }
-
-        return true;
-    }
-
-
-    /**
-     * Return string representation of monero address
-     */
-    string
-    print_address(const account_public_address& address, bool testnet)
-    {
-        return "<" + get_account_address_as_str(testnet, address) + ">";
-    }
 
     string
     print_sig (const signature& sig)
@@ -162,13 +135,24 @@ namespace xmreg
         return string(str_buff, len);
     }
 
-
-    ostream&
-    operator<< (ostream& os, const account_public_address& addr)
+    std::string
+    my_get_account_address_as_str(
+            bool testnet, account_public_address const & adr)
     {
-        os << get_account_address_as_str(false, addr);
-        return os;
+        uint64_t address_prefix = testnet ?
+                                  config::testnet::CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX
+                                  : config::CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
+
+        return tools::base58::encode_addr(address_prefix, t_serializable_object_to_blob(adr));
     }
+
+//    ostream&
+//    operator<< (ostream& os, const address_parse_info& addr_info)
+//    {
+//        os << get_account_address_as_str(false, addr_info.is_subaddress, addr_info.address);
+//        return os;
+//    }
+
 
 
     /*
@@ -749,41 +733,6 @@ namespace xmreg
         return body;
     }
 
-    bool
-    get_dummy_account_keys(account_keys& dummy_keys, bool testnet)
-    {
-        secret_key adress_prv_viewkey;
-        secret_key adress_prv_spendkey;
-
-        account_public_address dummy_address;
-
-        if (!get_account_address_from_str(dummy_address,
-                                     testnet,
-                                     "4BAyX63gVQgDqKS1wmqNVHdcCNjq1jooLYCXsKEY9w7VdGh45oZbPLvN7y8oVg2zmnhECkRBXpREWb97KtfAcT6p1UNXm9K"))
-        {
-            return false;
-        }
-
-
-        if (!epee::string_tools::hex_to_pod("f238be69411631f35b76c5a9148b3b7e8327eb41bfd0b396e090aeba40235d01", adress_prv_viewkey))
-        {
-            return false;
-        }
-
-        if (!epee::string_tools::hex_to_pod("5db8e1d2c505f888e54aca15b1a365c8814d7deebc1a246690db3bf71324950d", adress_prv_spendkey))
-        {
-            return false;
-        }
-
-
-        dummy_keys = account_keys {
-                dummy_address,
-                adress_prv_spendkey,
-                adress_prv_viewkey
-        };
-
-        return true;
-    }
 
     time_t
     to_time_t(pt::ptime t)

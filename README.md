@@ -1,9 +1,12 @@
-# Export our transactions from blockchain into csv file
+# Exporting our transactions from blockchain and searching for ring members into csv files
 
 In this example, it is shown how to export our transactions from the blockchain
 into a csv file. This can be very useful
 for making summaries or reports of our incoming and outgoing (when spend key is given)
  transactions.
+
+Also it shows how we can search in which transactions used our outputs as
+its ring members.
 
 
 
@@ -27,7 +30,7 @@ git clone https://github.com/monero-project/monero
 cd monero/
 
 # checkout last monero version
-git checkout -b last_release v0.11.0.0
+git checkout -b last_release v0.11.1.0
 
 make
 ```
@@ -66,20 +69,25 @@ make
 ```bash
 [mwo@arch cmake-build-debug]$ ./xmr2csv -h
 xmr2csv, export all your transactions into csv file:
-  -h [ --help ] [=arg(=1)] (=0) produce help message
-  -a [ --address ] arg          monero address string
-  -v [ --viewkey ] arg          private view key string
-  -s [ --spendkey ] arg         private spend key string
-  -t [ --start-height ] arg     start from given height
-  -d [ --start-date ] arg       start roughly from given date: yyyy-mm-dd
-  -c [ --out-csv-file ] arg     name of outputs csv file
-  -b [ --bc-path ] arg          path to lmdb blockchain
-  --testnet [=arg(=1)] (=0)     is the address from testnet network
-  --all-outputs [=arg(=1)] (=0) output all outputs, whether they are ours or 
-                                not
+  -h [ --help ] [=arg(=1)] (=0)         produce help message
+  -a [ --address ] arg                  monero address string
+  -v [ --viewkey ] arg                  private view key string
+  -s [ --spendkey ] arg                 private spend key string
+  -t [ --start-height ] arg             start from given height
+  -d [ --start-date ] arg               start roughly from given date:
+                                        yyyy-mm-dd
+  -c [ --out-csv-file ] arg             name of outputs csv file
+  -r [ --out-csv-file2 ] arg            name of outputs csv file for file
+                                        containing  out outputs as ring members
+  -b [ --bc-path ] arg                  path to lmdb blockchain
+  --testnet [=arg(=1)] (=0)             is the address from testnet network
+  -m [ --ring-members ] [=arg(=1)] (=0) search where our outputs are as ring
+                                        members
+  --all-outputs [=arg(=1)] (=0)         output all outputs, whether they are
+                                        ours or not
 ```
 
-## Testing address and viewkey
+## Getting our outputs using address and viewkey
 
 For testing of the viewer, one can use [official address and viewkey](https://github.com/monero-project/bitmonero#supporting-the-project)
 of the Monero, i.e.,
@@ -97,7 +105,7 @@ Monero [forum donation](https://www.reddit.com/r/Monero/comments/5j2rm7/in_last_
 - Viewkey: c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c
 
 ```bash
-./xmr2csv -a ./xmr2csv -a 44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A -v f359631075708155cc3d92a32b75a7d02a5dcf27756707b47a2b31b21c389501 -c ./forum.csv 
+./xmr2csv -a 44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A -v f359631075708155cc3d92a32b75a7d02a5dcf27756707b47a2b31b21c389501 -c ./forum.csv
 ```
 
 [Old Monero donation](https://github.com/monero-project/monero/pull/714/files) address:
@@ -106,9 +114,45 @@ Monero [forum donation](https://www.reddit.com/r/Monero/comments/5j2rm7/in_last_
 - Viewkey: e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703
 
 ```bash
-./xmr2csv -a 46BeWrHpwXmHDpDEUmZBWZfoQpdc6HaERCNmx1pEYL2rAcuwufPN9rXHHtyUA4QVy66qeFQkn6sfK8aHYjA3jk3o1Bv16em -v e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703 -c ./old.csv 
+./xmr2csv -a 46BeWrHpwXmHDpDEUmZBWZfoQpdc6HaERCNmx1pEYL2rAcuwufPN9rXHHtyUA4QVy66qeFQkn6sfK8aHYjA3jk3o1Bv16em -v e422831985c9205238ef84daf6805526c14d96fd7b059fe68c7ab98e495e5703 -c ./old.csv
 ```
 
+
+## Searching txs which use our outputs as ring members and their frequency
+
+Just add `-m` flag. This will produce `xmr_report_ring_members.csv` and `xmr_report_ring_members_frew.csv` files
+ (default names) which
+contain the list of txs which use our outputs, and frequency of outputs use, respectively. To speed up the search
+we can use `-t` flag to specify starting block.
+
+```bash
+./xmr2csv -t 550000 -m -a 45ttEikQEZWN1m7VxaVN9rjQkpSdmpGZ82GwUps66neQ1PqbQMno4wMY8F5jiDt2GoHzCtMwa7PDPJUJYb1GYrMP4CwAwNp -v c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c
+```
+
+Example frequency lists:
+
+```
+Output_pub_key	Frequency
+3ae472a405ffb000fa14cb380a5408cdebe25610ab16ced17cc9cf601dcf3860	10
+1a163937a399ff6712806eec5c5ed0701ae2a8718d8fcc583d23798202f952f0	10
+04782e24ca5c944f0d4bb764fd3b95c6b6f59144ee2a3c7530a2269e4a19a650	10
+6c04b7393d223b4c3b35493219c6a4d9bb37b6739c9a22193394d5e81964b5a3	9
+74f56217c41d98026f7c063c574eb346cc1ff6948f29f5f11f625385d6adccfb	9
+d5a68831eafb592b8f9b71b916c1583fd4ac99ac8d1767d30170875a42abf3e7	9
+ca3937ba591d68f4dc87bdd180a141dcebd1584dcdde4736af691a98b5d9b97e	9
+960efddca6a706ed70b6b17ac0799f15efe88d9f26ae5aa235a6f16995651288	9
+da3cbc0bb751e938d058c556f3c1a3ce215231c04d834f99e6a603c67d17648a	9
+f38102f85dfd72326c533c7d8c47559f49648ab6a3f7e7413819262be312df08	8
+ab3b1e10466706d6a4b1dde91a3243e534d95d54bee391edc313c43c842b0eff	8
+99e55c3c4e75b9880db36489eb70299c8d7dff637613eed91ebca7338e713052	8
+6e8c3e47fcfb91e4d6bd9e19f2d42a0a0ec3836116034423d3b9aa4b5802efc6	8
+d6914592b30902f77e563ff38ccfc30c70c95395981246d8d26bf17a1575fadb	8
+958a0535ef3a2ce61a683dd35996ecdf2f3139c5dbc53e37033f13849bab9221	8
+fdbd02a04b27393391c49f9fbf17eb0aa2fac05997f214339b482edfa1746a37	8
+bf989786802686c6be141831f9973e2108fd84c24552e38e3ef29b139513d9d9	8
+a19b6874392162abdb26a3ac64618450a1a850abc3ebe1ac72ef8a3092b26c53	8
+39ea511eaa1b90ada153ae62cbb986411f601e71fed6582528b84723f10dd5c8	8
+```
 
 ## How can you help?
 

@@ -123,7 +123,7 @@ namespace xmreg
 
         if (!xmreg::get_payment_id(tx, payment_id))
         {
-            payment_id = cryptonote::null_hash;
+            payment_id = null_hash;
         }
 
         // get the total number of outputs in a transaction.
@@ -282,7 +282,7 @@ namespace xmreg
 
         if (!xmreg::get_payment_id(tx, payment_id))
         {
-            payment_id = cryptonote::null_hash;
+            payment_id = null_hash;
         }
 
         // get the total number of outputs in a transaction.
