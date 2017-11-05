@@ -3,6 +3,7 @@
 #include "src/tools.h"
 
 #include "ext/minicsv.h"
+#include "ext/ostream.h"
 #include "ext/format.h"
 
 #include <iostream>
