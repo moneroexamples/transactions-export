@@ -125,11 +125,13 @@ Just add `-m` flag. This will produce `xmr_report_ring_members.csv` and `xmr_rep
 contain the list of txs which use our outputs, and frequency of outputs use, respectively. To speed up the search
 we can use `-t` flag to specify starting block.
 
+#### Example 1 (Monero project donation address)
+
 ```bash
 ./xmr2csv -t 550000 -m -a 45ttEikQEZWN1m7VxaVN9rjQkpSdmpGZ82GwUps66neQ1PqbQMno4wMY8F5jiDt2GoHzCtMwa7PDPJUJYb1GYrMP4CwAwNp -v c9347bc1e101eab46d3a6532c5b6066e925f499b47d285d5720e6a6f4cc4350c
 ```
 
-Example frequency lists:
+Example frequency list output:
 
 ```
 Output_pub_key	Frequency
@@ -152,6 +154,28 @@ fdbd02a04b27393391c49f9fbf17eb0aa2fac05997f214339b482edfa1746a37	8
 bf989786802686c6be141831f9973e2108fd84c24552e38e3ef29b139513d9d9	8
 a19b6874392162abdb26a3ac64618450a1a850abc3ebe1ac72ef8a3092b26c53	8
 39ea511eaa1b90ada153ae62cbb986411f601e71fed6582528b84723f10dd5c8	8
+```
+
+#### Example 2 (Monerujo project donation address)
+
+
+```bash
+./xmr2csv -t 1300000 -m -a 4AdkPJoxn7JCvAby9szgnt93MSEwdnxdhaASxbTBm6x5dCwmsDep2UYN4FhStDn5i11nsJbpU7oj59ahg8gXb1Mg3viqCuk -v b1aff2a12191723da0afbe75516f94dd8b068215f6e847d8da57aca5f1f98e0c
+```
+
+Example frequency list output:
+
+```
+Most frequent outputs used as ring members are:
+ - <024a777f20a02a3c145c27e8dd53d05c708b78e1c9832f6b843acfd29c6ac469>: 8
+ - <b50f169d04c4e74c35437efc9da832091737c61a8e990182951758a2702d6080>: 7
+ - <ff00dc60cbc599e520d33d5bbc999daf1f4e30479e558b425ef8d092809af5d5>: 5
+ - <2dd2a007071b0a612d601d2fa1989ee0cdc351ef2db21519697f9b3b03839e68>: 5
+ - <64d6394f2f11142ef04dc67bb7bd2ae5e0ff0f11d0a211e4fe28d58dfdd6d6e3>: 5
+ - <673f5784b7ed703c206fea8a9076b356b93e76e7a26f55b558626434f5268c0f>: 5
+ - <95569a43937da8ceca8598535f9029c82249bec0ef5ef0890a52086e566fcc85>: 4
+ - <1b92b3e6c650c248a4865a95a15e1d264037b4068c7053119d5288aa70e60c8f>: 4
+ - <643687fa00850056492dd2da90c720a5daff590745c6ab331210163f663e0bf8>: 4
 ```
 
 ## How can you help?
