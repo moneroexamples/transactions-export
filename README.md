@@ -162,6 +162,7 @@ a19b6874392162abdb26a3ac64618450a1a850abc3ebe1ac72ef8a3092b26c53	8
 
 ```bash
 ./xmr2csv -t 01381000 -m -a 4AdkPJoxn7JCvAby9szgnt93MSEwdnxdhaASxbTBm6x5dCwmsDep2UYN4FhStDn5i11nsJbpU7oj59ahg8gXb1Mg3viqCuk -v b1aff2a12191723da0afbe75516f94dd8b068215f6e847d8da57aca5f1f98e0c
+
 ```
 
 Example frequency list output:
@@ -177,6 +178,7 @@ Most frequent outputs used as ring members are:
  - <95569a43937da8ceca8598535f9029c82249bec0ef5ef0890a52086e566fcc85>: 4
  - <1b92b3e6c650c248a4865a95a15e1d264037b4068c7053119d5288aa70e60c8f>: 4
  - <643687fa00850056492dd2da90c720a5daff590745c6ab331210163f663e0bf8>: 4
+```
 
 ## How can you help?
 
