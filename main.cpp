@@ -3,13 +3,14 @@
 #include "src/tools.h"
 
 #include "ext/minicsv.h"
-#include "ext/ostream.h"
-#include "ext/format.h"
+#include "fmt/ostream.h"
+#include "fmt/format.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <set>
+#include <tuple>
 #include <type_traits>
 
 using boost::filesystem::path;
@@ -103,6 +104,18 @@ struct address_helper
 
 };
 
+template <typename T>
+string
+vec2str(vector<T> const& vec, const char* sep = ":")
+{
+    stringstream ss;
+
+    std::copy(begin(vec), end(vec),
+              infix_ostream_iterator<T>(ss, sep));
+
+    return ss.str();
+}
+
 int main(int ac, const char* av[]) {
 
     // get command line options
@@ -147,7 +160,6 @@ int main(int ac, const char* av[]) {
     bool testnet         = *testnet_opt ;
     bool ring_members    = *ring_members_opt ;
     bool all_outputs     = *all_outputs_opt;
-
 
     bool SPEND_KEY_GIVEN = (spendkey_str.empty() ? false : true);
 
@@ -360,8 +372,8 @@ int main(int ac, const char* av[]) {
     // here we store number of times our output was used as ring member
     // so that at the end of the progrem, we can show most frequently used
     // outputs.
-
-    unordered_map<crypto::public_key, uint64_t> ring_member_frequency;
+    //               output pub key ,       freq.   , ring sizes
+    unordered_map<crypto::public_key, tuple<uint64_t, vector<uint64_t>>> ring_member_frequency;
 
 
     // to check which inputs our ours, we need
@@ -597,9 +609,11 @@ int main(int ac, const char* av[]) {
 
                         // this seems to be our mixin.
 
-                        ring_member_frequency[it->first] += 1;
+                        std::get<0>(ring_member_frequency[it->first]) += 1;
+                        std::get<1>(ring_member_frequency[it->first]).push_back(count);
 
-                        cout << " - found output as ring member: " << count << ", " << it->first
+                        cout << " - found output as ring member: " << count
+                             << ", " << it->first
                              << ", tx hash: " << tx_hash << '\n';
 
                         *csv_os2 << blk_time
@@ -661,7 +675,7 @@ int main(int ac, const char* av[]) {
                   {
                       // types look complicated. so 'left' is
                       // referenece to 'const pointer' which points to 'const map_t'
-                      return left->second > right->second;
+                      return std::get<0>(left->second) > std::get<0>(right->second);
                   });
 
 
@@ -671,7 +685,7 @@ int main(int ac, const char* av[]) {
             cerr << "Cant open file: " << out_csv_file3 << endl;
 
         // write the header of the csv file to be created
-        *csv_os3 << "Output_pub_key" << "Frequency" << NEWLINE;
+        *csv_os3 << "Output_pub_key" << "Frequency" << "Ring_size" << NEWLINE;
 
         cout << "\nMost frequent outputs used as ring members are:\n";
 
@@ -681,10 +695,19 @@ int main(int ac, const char* av[]) {
         {
 
             if (++i < 10) // dont show more than ten. all of them are in output csv.
-                cout << " - " << kvp->first << ": " << kvp->second << '\n';
+                cout << " - "
+                     << kvp->first /* output public key */
+                     << ": "
+                     << std::get<0>(kvp->second) /* frequency */
+                     << " ring sizes: "
+                     << vec2str(std::get<1>(kvp->second),"-")  /* ring sizes */
+                     << '\n';
 
             if  (csv_os3->is_open())
-                *csv_os3 << epee::string_tools::pod_to_hex(kvp->first) << kvp->second << NEWLINE;
+                *csv_os3 << epee::string_tools::pod_to_hex(kvp->first) /* output public key */
+                         << std::get<0>(kvp->second) /* frequency */
+                         << vec2str(std::get<1>(kvp->second),"-")  /* ring sizes */
+                         << NEWLINE;
         }
 
         if (csv_os3->is_open())

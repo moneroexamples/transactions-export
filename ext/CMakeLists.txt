@@ -1,17 +1,14 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 
 project(myext)
 
 set(SOURCE_HEADERS
         minicsv.h
-		format.h
-		dateparser.h
-		ostream.h)
+		dateparser.h)
 
 set(SOURCE_FILES
-		format.cc
-		ostream.cc
 		dateparser.cpp)
+
 
 # make static library called libmyxrm
 # that we are going to link to
