@@ -9,6 +9,8 @@
 #include <ostream>
 #include <iterator>
 #include <string>
+#include <sstream>
+#include <vector>
 
 template <class T, class charT=char, class traits=std::char_traits<charT> >
 class infix_ostream_iterator :
@@ -52,6 +54,19 @@ public:
         return *this;
     }
 };
+
+
+template <typename T>
+std::string
+vec2str(std::vector<T> const& vec, const char* sep = ":")
+{
+    std::stringstream ss;
+
+    std::copy(std::begin(vec), std::end(vec),
+              infix_ostream_iterator<T>(ss, sep));
+
+    return ss.str();
+}
 
 #endif
 

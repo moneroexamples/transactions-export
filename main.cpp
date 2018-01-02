@@ -104,20 +104,9 @@ struct address_helper
 
 };
 
-template <typename T>
-string
-vec2str(vector<T> const& vec, const char* sep = ":")
+int
+main(int ac, const char* av[])
 {
-    stringstream ss;
-
-    std::copy(begin(vec), end(vec),
-              infix_ostream_iterator<T>(ss, sep));
-
-    return ss.str();
-}
-
-int main(int ac, const char* av[]) {
-
     // get command line options
     xmreg::CmdLineOptions opts {ac, av};
 
@@ -171,18 +160,14 @@ int main(int ac, const char* av[]) {
         return EXIT_FAILURE;
     }
 
-
     print("Blockchain path: {:s}\n", blockchain_path);
-
 
     // change timezone to Universtal time zone
     char old_tz[128];
     const char *tz_org = getenv("TZ");
 
     if (tz_org)
-    {
         strcpy(old_tz, tz_org);
-    }
 
     // set new timezone
     std::string tz = "TZ=Coordinated Universal Time";
@@ -353,7 +338,7 @@ int main(int ac, const char* av[]) {
 
         // write the header of the csv file to be created
         *csv_os2 << "Timestamp" << "Output_pub_key" << "Tx_hash"
-                 << "Key_image" << "ring_no"
+                 << "Key_image" << "ring_no/ring_size"
                  << NEWLINE;
     }
 
@@ -579,6 +564,8 @@ int main(int ac, const char* av[]) {
                         continue;
                     }
 
+                    uint64_t ring_size = absolute_offsets.size();
+
                     // mixin counter
                     size_t count = 0;
 
@@ -610,9 +597,9 @@ int main(int ac, const char* av[]) {
                         // this seems to be our mixin.
 
                         std::get<0>(ring_member_frequency[it->first]) += 1;
-                        std::get<1>(ring_member_frequency[it->first]).push_back(count);
+                        std::get<1>(ring_member_frequency[it->first]).push_back(ring_size);
 
-                        cout << " - found output as ring member: " << count
+                        cout << " - found output as ring member: " << (count + 1)
                              << ", " << it->first
                              << ", tx hash: " << tx_hash << '\n';
 
@@ -620,7 +607,8 @@ int main(int ac, const char* av[]) {
                                  << epee::string_tools::pod_to_hex(it->first)
                                  << epee::string_tools::pod_to_hex(tx_hash)
                                  << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
-                                 << count << NEWLINE;
+                                 << std::to_string(count + 1) + "/" + std::to_string(ring_size)
+                                 << NEWLINE;
 
                         csv_os2->flush();
 
@@ -693,20 +681,21 @@ int main(int ac, const char* av[]) {
 
         for (map_ptr_t& kvp: sorted_frequencies)
         {
+            string ring_sizes = vec2str(std::get<1>(kvp->second), "_");
 
             if (++i < 10) // dont show more than ten. all of them are in output csv.
                 cout << " - "
                      << kvp->first /* output public key */
                      << ": "
                      << std::get<0>(kvp->second) /* frequency */
-                     << " ring sizes: "
-                     << vec2str(std::get<1>(kvp->second),"-")  /* ring sizes */
+                     << " times with ring sizes of "
+                     << ring_sizes  /* ring sizes */
                      << '\n';
 
             if  (csv_os3->is_open())
                 *csv_os3 << epee::string_tools::pod_to_hex(kvp->first) /* output public key */
                          << std::get<0>(kvp->second) /* frequency */
-                         << vec2str(std::get<1>(kvp->second),"-")  /* ring sizes */
+                         << ring_sizes  /* ring sizes */
                          << NEWLINE;
         }
 

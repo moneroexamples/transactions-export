@@ -6,7 +6,7 @@ set(PROJECT_NAME
 project(${PROJECT_NAME})
 
 set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -std=c++11")
+        "${CMAKE_CXX_FLAGS} -std=c++14")
 
 
 if (NOT MONERO_DIR)
