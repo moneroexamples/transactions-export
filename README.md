@@ -12,7 +12,7 @@ its ring members.
 
 ## Compilation on Ubuntu 16.04
 
-##### Compile latest Monero release v0.11
+##### Compile latest Monero 
 
 Download and compile recent Monero into your home folder:
 
@@ -28,9 +28,6 @@ cd ~
 git clone https://github.com/monero-project/monero
 
 cd monero/
-
-# checkout last monero version
-git checkout -b last_release v0.11.1.0
 
 make
 ```
