@@ -638,6 +638,7 @@ for (uint64_t i = start_height; i < height; ++i)
                                  << epee::string_tools::pod_to_hex(output_data.pubkey)
                                  << NEWLINE;
 
+                        ++count;
                         continue;
                     }
 
