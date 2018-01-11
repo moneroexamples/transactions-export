@@ -363,7 +363,9 @@ if (all_key_images)
     // write the header of the csv file to be created
     *csv_os4 << "Timestamp" << "Block_no" << "Tx_hash"
              << "Key_image" << "Absolute_key_offset"
-             <<  "Referenced_output_pub_key"
+             << "Referenced_output_pub_key"
+             << "Referenced_tx_hash"
+             << "Reference_out_index_in_the_ref_tx"
              << NEWLINE;
 }
 
@@ -629,13 +631,36 @@ for (uint64_t i = start_height; i < height; ++i)
                         // write all key images into file
                         // with associated offsets and the references public
                         // output keys in this format
-                        // "Timestamp" << "Block_no" << "Tx_hash"
-                        // "Key_image" << "Absolute_key_offset" <<  "Referenced_output_pub_key"
+
+                        // get reference output tx (i.e., from which tx the output comes from)
+                        cryptonote::tx_out_index tx_out_idx;
+
+                        try
+                        {
+                            // get pair pair<crypto::hash, uint64_t> where first is tx hash
+                            // and second is local index of the output i in that tx
+                            tx_out_idx = core_storage->get_db()
+                                    .get_output_tx_and_index(xmr_amount, abs_offset);
+                        }
+                        catch (const cryptonote::OUTPUT_DNE &e)
+                        {
+
+                            string out_msg = fmt::format(
+                                    "Output with amount {:d} and index {:d} does not exist!",
+                                    xmr_amount, abs_offset);
+
+                            cerr << out_msg << '\n';
+
+                            ++count;
+                            continue;
+                        }
 
                         *csv_os4 << blk_time << i << epee::string_tools::pod_to_hex(tx_hash)
                                  << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
                                  << abs_offset
                                  << epee::string_tools::pod_to_hex(output_data.pubkey)
+                                 << epee::string_tools::pod_to_hex(tx_out_idx.first)
+                                 << tx_out_idx.second
                                  << NEWLINE;
 
                         ++count;
