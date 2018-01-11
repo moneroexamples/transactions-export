@@ -444,8 +444,7 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     std::string key_img = ss.str();
 
 
-    ostm << xmreg::timestamp_to_str(td.m_block_timestamp, "%F");
-    ostm << xmreg::timestamp_to_str(td.m_block_timestamp, "%T");
+    ostm << xmreg::timestamp_to_str(td.m_block_timestamp);
     ostm << td.m_block_height;
     ostm << tx_hash_str.substr(1, tx_hash_str.length()-2);
     ostm << tx_pub_key_str.substr(1, tx_hash_str.length()-2);

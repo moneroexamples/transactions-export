@@ -71,17 +71,30 @@ xmr2csv, export all your transactions into csv file:
   -v [ --viewkey ] arg                  private view key string
   -s [ --spendkey ] arg                 private spend key string
   -t [ --start-height ] arg             start from given height
-  -d [ --start-date ] arg               start roughly from given date:
+  -d [ --start-date ] arg               start roughly from given date: 
                                         yyyy-mm-dd
-  -c [ --out-csv-file ] arg             name of outputs csv file
-  -r [ --out-csv-file2 ] arg            name of outputs csv file for file
+  -c [ --out-csv-file ] arg (=xmr_report.csv)
+                                        name of outputs csv file
+  -r [ --out-csv-file2 ] arg (=xmr_report_ring_members.csv)
+                                        name of outputs csv file for file 
                                         containing  out outputs as ring members
+  -r [ --out-csv-file3 ] arg (=xmr_report_ring_members_freq.csv)
+                                        name of outputs csv file for file 
+                                        containing frequencies of outputs as 
+                                        ring members
+  -r [ --out-csv-file4 ] arg (=xmr_report_key_images_outputs.csv)
+                                        name of outputs csv file for file 
+                                        containing all key images scanned with 
+                                        the referenced output public keys
   -b [ --bc-path ] arg                  path to lmdb blockchain
   --testnet [=arg(=1)] (=0)             is the address from testnet network
-  -m [ --ring-members ] [=arg(=1)] (=0) search where our outputs are as ring
+  -m [ --ring-members ] [=arg(=1)] (=0) search where our outputs are as ring 
                                         members
-  --all-outputs [=arg(=1)] (=0)         output all outputs, whether they are
-                                        ours or not
+  --all-outputs [=arg(=1)] (=0)         save all outputs, whether they are ours
+                                        or not
+  --all-key-images [=arg(=1)] (=0)      save all key_images, whether they are 
+                                        ours or not, with referenced output 
+                                        public keys
 ```
 
 ## Getting our outputs using address and viewkey

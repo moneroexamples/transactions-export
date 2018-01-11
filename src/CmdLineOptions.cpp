@@ -37,6 +37,9 @@ namespace xmreg
                  "name of outputs csv file for file containing  out outputs as ring members")
                 ("out-csv-file3,r", value<string>()->default_value("xmr_report_ring_members_freq.csv"),
                  "name of outputs csv file for file containing frequencies of outputs as ring members")
+                ("out-csv-file4,r", value<string>()->default_value("xmr_report_key_images_outputs.csv"),
+                 "name of outputs csv file for file containing all key "
+                         "images scanned with the referenced output public keys")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain")
                 ("testnet",  value<bool>()->default_value(false)->implicit_value(true),
@@ -44,7 +47,9 @@ namespace xmreg
                 ("ring-members,m",  value<bool>()->default_value(false)->implicit_value(true),
                  "search where our outputs are as ring members")
                 ("all-outputs",  value<bool>()->default_value(false)->implicit_value(true),
-                 "output all outputs, whether they are ours or not");
+                 "save all outputs, whether they are ours or not")
+                ("all-key-images",  value<bool>()->default_value(false)->implicit_value(true),
+                "save all key_images, whether they are ours or not, with referenced output public keys");
 
 
         store(command_line_parser(acc, avv)
