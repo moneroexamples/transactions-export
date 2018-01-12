@@ -29,6 +29,8 @@ namespace xmreg
                  "private spend key string")
                 ("start-height,t", value<size_t>(),
                  "start from given height")
+                ("no-of-blocks,n", value<size_t>()->default_value(0),
+                 "number of blocks to search starting from start-height (0 = all blocks)")
                 ("start-date,d", value<string>(),
                  "start roughly from given date: yyyy-mm-dd")
                 ("out-csv-file,c", value<string>()->default_value("xmr_report.csv"),

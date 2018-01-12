@@ -124,6 +124,7 @@ auto address_opt         = opts.get_option<string>("address");
 auto viewkey_opt         = opts.get_option<string>("viewkey");
 auto spendkey_opt        = opts.get_option<string>("spendkey");
 auto start_height_opt    = opts.get_option<size_t>("start-height");
+auto no_of_blocks_opt    = opts.get_option<size_t>("no-of-blocks");
 auto start_date_opt      = opts.get_option<string>("start-date");
 auto out_csv_file_opt    = opts.get_option<string>("out-csv-file");  // for our outputs only
 auto out_csv_file2_opt   = opts.get_option<string>("out-csv-file2"); // for our outputs as ring members in other txs
@@ -145,6 +146,7 @@ string viewkey_str   = viewkey_opt ? *viewkey_opt
 string spendkey_str  = spendkey_opt ? *spendkey_opt
                       : "";
 size_t start_height  = start_height_opt ? *start_height_opt : 0;
+size_t no_of_blocks  = *no_of_blocks_opt;
 string start_date    = start_date_opt ? *start_date_opt : "1970-01-01";
 
 string out_csv_file  = *out_csv_file_opt;
@@ -398,6 +400,8 @@ unordered_map<crypto::public_key, tuple<uint64_t, vector<uint64_t>>> ring_member
 // simple as veryfing if a given key_image exist in our vector.
 vector<crypto::key_image> key_images_gen;
 
+size_t blk_counter {0};
+
 for (uint64_t i = start_height; i < height; ++i)
 {
     cryptonote::block blk;
@@ -411,6 +415,11 @@ for (uint64_t i = start_height; i < height; ++i)
         cerr << e.what() << '\n';
         continue;
     }
+
+    // break the loob if we processed more than
+    // requested no_of_blocks
+    if (no_of_blocks > 0 && ++blk_counter > no_of_blocks)
+        break;
 
     string blk_time = xmreg::timestamp_to_str(blk.timestamp);
 
@@ -533,10 +542,11 @@ for (uint64_t i = start_height; i < height; ++i)
         // some of these inputs might be our spendings
         size_t input_no = tx.vin.size();
 
-        if (all_key_images)
+        if (all_key_images && input_no > 0)
         {
-            print(" - found {:02d}  inputs in block {:08d} ({:s}) - writing to the csv\n",
-                  input_no, i, blk_time);
+            if(tx.vin[0].type() == typeid(cryptonote::txin_to_key))
+                print(" - found {:02d}  inputs in block {:08d} ({:s}) - writing to the csv\n",
+                      input_no, i, blk_time);
         }
 
         //cout << tx_hash << ", input_no " << input_no << endl;

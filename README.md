@@ -71,6 +71,8 @@ xmr2csv, export all your transactions into csv file:
   -v [ --viewkey ] arg                  private view key string
   -s [ --spendkey ] arg                 private spend key string
   -t [ --start-height ] arg             start from given height
+  -n [ --no-of-blocks ] arg (=0)        number of blocks to search starting 
+                                        from start-height
   -d [ --start-date ] arg               start roughly from given date: 
                                         yyyy-mm-dd
   -c [ --out-csv-file ] arg (=xmr_report.csv)
