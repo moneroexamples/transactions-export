@@ -364,7 +364,7 @@ if (all_key_images)
 
     // write the header of the csv file to be created
     *csv_os4 << "Timestamp" << "Block_no" << "Tx_hash"
-             << "Key_image" << "Absolute_key_offset"
+             << "Key_image" << "Ring_size" << "Absolute_key_offset"
              << "Referenced_output_pub_key"
              << "Referenced_tx_hash"
              << "Reference_out_index_in_the_ref_tx"
@@ -667,6 +667,7 @@ for (uint64_t i = start_height; i < height; ++i)
 
                         *csv_os4 << blk_time << i << epee::string_tools::pod_to_hex(tx_hash)
                                  << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
+                                 << ring_size
                                  << abs_offset
                                  << epee::string_tools::pod_to_hex(output_data.pubkey)
                                  << epee::string_tools::pod_to_hex(tx_out_idx.first)
