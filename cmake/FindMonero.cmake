@@ -29,7 +29,7 @@
 #------------------------------------------------------------------------------
 
 set(LIBS common;blocks;cryptonote_basic;cryptonote_core;
-		cryptonote_protocol;daemonizer;mnemonics;epee;lmdb;
+		cryptonote_protocol;daemonizer;mnemonics;epee;lmdb;device;
 		blockchain_db;ringct;wallet;cncrypto;easylogging;version;checkpoints)
 
 set(Xmr_INCLUDE_DIRS "${CPP_MONERO_DIR}")
@@ -63,6 +63,14 @@ if(EXISTS "${MONERO_SOURCE_DIR}/build/release/version/version.h")
 else()
 	message("not setting -DMONERO_VERSION_VERSION flag")
 endif()
+
+if (EXISTS ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
+	message(STATUS FindMonero " found libringct_basic.a")
+	add_library(ringct_basic STATIC IMPORTED)
+	set_property(TARGET ringct_basic
+			PROPERTY IMPORTED_LOCATION ${MONERO_BUILD_DIR}/src/ringct/libringct_basic.a)
+endif()
+
 
 message(STATUS ${MONERO_SOURCE_DIR}/build)
 

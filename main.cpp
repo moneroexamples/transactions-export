@@ -40,25 +40,25 @@ struct address_helper
 
     template <typename Q = T>
     bool get_account_address_from_str_helper(
-            Q& address, bool testnet, std::string const& address_str)
+            Q& address, cryptonote::network_type nettype, std::string const& address_str)
     {
-        return get_account_address_from_str(address, testnet, address_str);
+        return get_account_address_from_str(address, nettype, address_str);
     }
 
     std::string get_account_address_as_str_helper(
-            bool testnet, bool subaddress,
+            cryptonote::network_type nettype, bool subaddress,
             const cryptonote::account_public_address& address)
     {
         (void) subaddress;
-        return xmreg::my_get_account_address_as_str(testnet, address);
+        return xmreg::my_get_account_address_as_str(nettype, address);
     }
 
     // should be used when cryptonote::address_parse_info is avaliable
     template <typename Q = T>
     typename std::enable_if<std::is_constructible<Q>::value, string>::type
-    print_address(Q const& address, bool testnet)
+    print_address(Q const& address, cryptonote::network_type nettype)
     {
-        return get_account_address_as_str_helper(testnet,
+        return get_account_address_as_str_helper(nettype,
                                           false /*assume we only have base address*/,
                                           address);
     }
@@ -66,19 +66,20 @@ struct address_helper
     // should be used when cryptonote::address_parse_info is NOT avaliable
     template <typename Q = T>
     typename std::enable_if<!std::is_constructible<Q>::value, string>::type
-    print_address(Q const& address, bool testnet)
+    print_address(Q const& address, cryptonote::network_type nettype)
     {
-        return get_account_address_as_str(testnet, address);
+        return get_account_address_as_str(nettype, address);
     }
 
     // should be used when cryptonote::address_parse_info is avaliable
     template<typename Q = T>
     typename std::enable_if<std::is_constructible<Q>::value, bool>::type
-    operator()(string const& address_str, bool testnet, cryptonote::account_public_address& addr)
+    operator()(string const& address_str, cryptonote::network_type nettype,
+               cryptonote::account_public_address& addr)
     {
         Q address_info;
 
-        if (get_account_address_from_str_helper(address_info, testnet, address_str))
+        if (get_account_address_from_str_helper(address_info, nettype, address_str))
         {
             addr = address_info.address;
         }
@@ -89,11 +90,13 @@ struct address_helper
     // should be used when cryptonote::address_parse_info is NOT avaliable
     template<typename Q = T>
     typename std::enable_if<!std::is_constructible<Q>::value, bool>::type
-    operator()(string const& address_str, bool testnet, cryptonote::account_public_address& addr)
+    operator()(string const& address_str,
+               cryptonote::network_type nettype,
+               cryptonote::account_public_address& addr)
     {
         cryptonote::account_public_address address;
 
-        if (get_account_address_from_str_helper(address, testnet, address_str))
+        if (get_account_address_from_str_helper(address, nettype, address_str))
         {
             addr = address;
             return true;
@@ -132,6 +135,7 @@ auto out_csv_file3_opt   = opts.get_option<string>("out-csv-file3"); // for freq
 auto out_csv_file4_opt   = opts.get_option<string>("out-csv-file4"); // for all key_images with referenced output public keys
 auto bc_path_opt         = opts.get_option<string>("bc-path");
 auto testnet_opt         = opts.get_option<bool>("testnet");
+auto stagenet_opt        = opts.get_option<bool>("stagenet");
 auto ring_members_opt    = opts.get_option<bool>("ring-members");
 auto all_outputs_opt     = opts.get_option<bool>("all-outputs");
 auto all_key_images_opt  = opts.get_option<bool>("all-key-images");
@@ -154,11 +158,24 @@ string out_csv_file2 = *out_csv_file2_opt;
 string out_csv_file3 = *out_csv_file3_opt;
 string out_csv_file4 = *out_csv_file4_opt;
 
-bool testnet         = *testnet_opt ;
+bool testnet         = *testnet_opt;
+bool stagenet        = *stagenet_opt;
 bool ring_members    = *ring_members_opt ;
 bool all_outputs     = *all_outputs_opt;
 bool all_key_images  = *all_key_images_opt;
 bool SPEND_KEY_GIVEN = (spendkey_str.empty() ? false : true);
+
+
+if (testnet && stagenet)
+{
+    cerr << "testnet and stagenet cannot be specified at the same time!" << endl;
+    return EXIT_FAILURE;
+}
+
+const cryptonote::network_type nettype = testnet ?
+      cryptonote::network_type::TESTNET : stagenet ?
+      cryptonote::network_type::STAGENET : cryptonote::network_type::MAINNET;
+
 
 path blockchain_path;
 
@@ -265,7 +282,7 @@ struct address_helper<cryptonote::address_parse_info> get_address;
 
 cryptonote::account_public_address address;
 
-if (!get_address(address_str,  testnet, address))
+if (!get_address(address_str,  nettype, address))
 {
     cerr << "Cant parse string address: " << address_str << '\n';
     return EXIT_FAILURE;
@@ -303,7 +320,7 @@ if (SPEND_KEY_GIVEN)
 
 // lets check our keys
 cout << '\n'
-     << "address          : " << get_address.print_address(address, testnet) << '\n'
+     << "address          : " << get_address.print_address(address, nettype) << '\n'
      << "private view key : "  << prv_view_key << '\n';
 
 if (SPEND_KEY_GIVEN)

@@ -46,6 +46,8 @@ namespace xmreg
                  "path to lmdb blockchain")
                 ("testnet",  value<bool>()->default_value(false)->implicit_value(true),
                  "is the address from testnet network")
+                ("stagenet",  value<bool>()->default_value(false)->implicit_value(true),
+                 "is the address from stagenet network")
                 ("ring-members,m",  value<bool>()->default_value(false)->implicit_value(true),
                  "search where our outputs are as ring members")
                 ("all-outputs",  value<bool>()->default_value(false)->implicit_value(true),
