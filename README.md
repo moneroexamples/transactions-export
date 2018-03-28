@@ -179,6 +179,7 @@ Most frequent outputs used as ring members are:
  - <ff00dc60cbc599e520d33d5bbc999daf1f4e30479e558b425ef8d092809af5d5>: 6 times with ring sizes of 5_5_6_3_5_5
  - <d836c0eddcee6e2f0b0b6f4d541194a70502dbcbd9c2b6858b6d7f035f163627>: 6 times with ring sizes of 5_5_5_9_5_5
  - <1b92b3e6c650c248a4865a95a15e1d264037b4068c7053119d5288aa70e60c8f>: 6 times with ring sizes of 5_5_5_5_5_21
+```
 
 ## How can you help?
 
