@@ -342,7 +342,7 @@ if (!csv_os->is_open())
 
 // write the header of the csv file to be created
 *csv_os <<"Timestamp" << "Block_no"
-       << "Tx_hash" << "Tx_public_key"
+       << "Tx_hash" << "Tx_public_key" << "Tx_version"
        << "Payment_id" << "Out_idx" << "Amount"
        << "Output_pub_key" << "Output_key_img"
        << "Output_spend"

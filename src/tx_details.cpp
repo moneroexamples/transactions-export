@@ -448,6 +448,7 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << td.m_block_height;
     ostm << tx_hash_str.substr(1, tx_hash_str.length()-2);
     ostm << tx_pub_key_str.substr(1, tx_hash_str.length()-2);
+    ostm << td.m_tx.version;
     ostm << payment_id_str.substr(1, tx_hash_str.length()-2);
     ostm << td.m_internal_output_index;
     ostm << cryptonote::print_money(td.m_amount);
