@@ -678,7 +678,7 @@ for (uint64_t i = start_height; i < height; ++i)
                         continue;
                     }
 
-                    if (it == known_outputs_keys.end())
+                    https://www.twitch.tv/cryptoworldnews             if (it == known_outputs_keys.end())
                     {
                         // this mixins's output is unknown.
                         ++count;
