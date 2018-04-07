@@ -644,13 +644,15 @@ namespace xmreg
                     amount = rct::decodeRctSimple(rv,
                                                   rct::sk2rct(scalar1),
                                                   i,
-                                                  mask);
+                                                  mask,
+                                                  hw::get_device("default"));
                     break;
                 case rct::RCTTypeFull:
                     amount = rct::decodeRct(rv,
                                             rct::sk2rct(scalar1),
                                             i,
-                                            mask);
+                                            mask,
+                                            hw::get_device("default"));
                     break;
                 default:
                     cerr << "Unsupported rct type: " << rv.type << endl;

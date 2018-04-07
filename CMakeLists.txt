@@ -91,6 +91,8 @@ set(LIBRARIES
         blocks
         lmdb
         ringct
+        ringct_basic
+        device
         common
         mnemonics
         epee
