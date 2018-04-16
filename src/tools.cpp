@@ -207,14 +207,16 @@ namespace xmreg
 
 
     string
-    get_default_lmdb_folder(bool testnet)
+    get_default_lmdb_folder(cryptonote::network_type nettype)
     {
         // default path to monero folder
         // on linux this is /home/<username>/.bitmonero
         string default_monero_dir = tools::get_default_data_dir();
 
-        if (testnet)
+        if (nettype == cryptonote::network_type::TESTNET)
             default_monero_dir += "/testnet";
+        if (nettype == cryptonote::network_type::STAGENET)
+            default_monero_dir += "/stagenet";
 
 
         // the default folder of the lmdb blockchain database
@@ -223,18 +225,19 @@ namespace xmreg
     }
 
 
+
     /*
-     * Ge blockchain exception from command line option
-     *
-     * If not given, provide default path
-     */
+    * Ge blockchain exception from command line option
+    *
+    * If not given, provide default path
+    */
     bool
     get_blockchain_path(const boost::optional<string>& bc_path,
                         bf::path& blockchain_path,
-                        bool testnet)
+                        cryptonote::network_type nettype)
     {
         // the default folder of the lmdb blockchain database
-        string default_lmdb_dir   = xmreg::get_default_lmdb_folder(testnet);
+        string default_lmdb_dir   = xmreg::get_default_lmdb_folder(nettype);
 
         blockchain_path = bc_path
                           ? bf::path(*bc_path)

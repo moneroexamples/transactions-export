@@ -179,7 +179,7 @@ const cryptonote::network_type nettype = testnet ?
 
 path blockchain_path;
 
-if (!xmreg::get_blockchain_path(bc_path_opt, blockchain_path, testnet))
+if (!xmreg::get_blockchain_path(bc_path_opt, blockchain_path, nettype))
 {
     cerr << "Error getting blockchain path." << '\n';
     return EXIT_FAILURE;
