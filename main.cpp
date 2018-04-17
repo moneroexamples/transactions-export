@@ -610,6 +610,18 @@ for (uint64_t i = start_height; i < height; ++i)
                 // we also use this if statment when all_key_images option is used
                 //
 
+
+                // from  bool core::check_tx_inputs_keyimages_domain(const transaction& tx) const
+                if (!(rct::scalarmultKey(rct::ki2rct(tx_in_to_key.k_image),
+                                         rct::curveOrder()) == rct::identity()))
+                {
+                    cerr << "Found key image with wrong domain: "
+                         << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
+                         << " in tx: " << epee::string_tools::pod_to_hex(tx_hash)
+                         << endl;
+                    return EXIT_SUCCESS;
+                }
+
                 // get absolute offsets of mixins
                 std::vector<uint64_t> absolute_offsets
                         = cryptonote::relative_output_offsets_to_absolute(
