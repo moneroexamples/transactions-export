@@ -97,6 +97,8 @@ set(LIBRARIES
         mnemonics
         epee
         easylogging
+        device
+        pcsclite
         fmt::fmt-header-only
 	pcsclite
         ${Boost_LIBRARIES}
