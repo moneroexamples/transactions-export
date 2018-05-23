@@ -98,6 +98,7 @@ set(LIBRARIES
         epee
         easylogging
         fmt::fmt-header-only
+	pcsclite
         ${Boost_LIBRARIES}
         pthread
         unbound
