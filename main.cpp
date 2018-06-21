@@ -18,95 +18,6 @@ using boost::filesystem::path;
 using namespace fmt;
 using namespace std;
 
-// declare  address_parse_info, for sfinae.
-// if we work with moenro v0.11.0 there is no address_parse_info.
-// but if with work with newer version, there is address_parse_info and we
-// use this to get address;
-namespace cryptonote {
-
-    // just have it declared. Dont need to provide any definitoin
-    // now. we let sfinae to choose the declaration which has definition.
-
-    struct address_parse_info;
-
-    std::string get_account_address_as_str(
-            bool testnet, const account_public_address& adr);
-
-}
-
-template <typename T = cryptonote::address_parse_info>
-struct address_helper
-{
-
-    template <typename Q = T>
-    bool get_account_address_from_str_helper(
-            Q& address, cryptonote::network_type nettype, std::string const& address_str)
-    {
-        return get_account_address_from_str(address, nettype, address_str);
-    }
-
-    std::string get_account_address_as_str_helper(
-            cryptonote::network_type nettype, bool subaddress,
-            const cryptonote::account_public_address& address)
-    {
-        (void) subaddress;
-        return xmreg::my_get_account_address_as_str(nettype, address);
-    }
-
-    // should be used when cryptonote::address_parse_info is avaliable
-    template <typename Q = T>
-    typename std::enable_if<std::is_constructible<Q>::value, string>::type
-    print_address(Q const& address, cryptonote::network_type nettype)
-    {
-        return get_account_address_as_str_helper(nettype,
-                                          false /*assume we only have base address*/,
-                                          address);
-    }
-
-    // should be used when cryptonote::address_parse_info is NOT avaliable
-    template <typename Q = T>
-    typename std::enable_if<!std::is_constructible<Q>::value, string>::type
-    print_address(Q const& address, cryptonote::network_type nettype)
-    {
-        return get_account_address_as_str(nettype, address);
-    }
-
-    // should be used when cryptonote::address_parse_info is avaliable
-    template<typename Q = T>
-    typename std::enable_if<std::is_constructible<Q>::value, bool>::type
-    operator()(string const& address_str, cryptonote::network_type nettype,
-               cryptonote::account_public_address& addr)
-    {
-        Q address_info;
-
-        if (get_account_address_from_str_helper(address_info, nettype, address_str))
-        {
-            addr = address_info.address;
-        }
-
-        return true;
-    }
-
-    // should be used when cryptonote::address_parse_info is NOT avaliable
-    template<typename Q = T>
-    typename std::enable_if<!std::is_constructible<Q>::value, bool>::type
-    operator()(string const& address_str,
-               cryptonote::network_type nettype,
-               cryptonote::account_public_address& addr)
-    {
-        cryptonote::account_public_address address;
-
-        if (get_account_address_from_str_helper(address, nettype, address_str))
-        {
-            addr = address;
-            return true;
-        }
-
-        return false;
-    }
-
-};
-
 int
 main(int ac, const char* av[])
 {
@@ -278,15 +189,15 @@ print("Start block height     : {:d}\n", start_height);
 print("Search for ring members: {:s}\n", (ring_members ? "True" : "False"));
 
 // parse string representing given monero address
-struct address_helper<cryptonote::address_parse_info> get_address;
+cryptonote::address_parse_info address_info;
 
-cryptonote::account_public_address address;
-
-if (!get_address(address_str,  nettype, address))
+if (!get_account_address_from_str(address_info,  nettype, address_str))
 {
     cerr << "Cant parse string address: " << address_str << '\n';
     return EXIT_FAILURE;
 }
+
+cryptonote::account_public_address address = address_info.address;
 
 
 // parse string representing given private viewkey
@@ -320,7 +231,7 @@ if (SPEND_KEY_GIVEN)
 
 // lets check our keys
 cout << '\n'
-     << "address          : " << get_address.print_address(address, nettype) << '\n'
+     << "address          : " << xmreg::print_address(address_info, nettype) << '\n'
      << "private view key : "  << prv_view_key << '\n';
 
 if (SPEND_KEY_GIVEN)
@@ -707,7 +618,7 @@ for (uint64_t i = start_height; i < height; ++i)
                         continue;
                     }
 
-                    https://www.twitch.tv/cryptoworldnews             if (it == known_outputs_keys.end())
+                    if (it == known_outputs_keys.end())
                     {
                         // this mixins's output is unknown.
                         ++count;
@@ -745,13 +656,25 @@ for (uint64_t i = start_height; i < height; ++i)
 } // for (uint64_t i = 0; i < height; ++i)
 
 if (csv_os->is_open())
+{
     csv_os->close();
+    cout << "\nCsv saved as: " << out_csv_file << '\n';
+}
+
 
 if (ring_members && csv_os2->is_open())
+{
+    cout << "\nRing members csv saved as: " << out_csv_file2 << '\n';
     csv_os2->close();
+}
+
 
 if (all_key_images && csv_os4->is_open())
+{
+    cout << "\nRing members csv saved as: " << out_csv_file4 << '\n';
     csv_os4->close();
+}
+
 
 // set timezone to orginal value
 if (tz_org != 0)
@@ -760,7 +683,7 @@ if (tz_org != 0)
     tzset();
 }
 
-cout << "\nCsv saved as: " << out_csv_file << '\n';
+
 
 
 if (ring_members)
@@ -824,7 +747,10 @@ if (ring_members)
     }
 
     if (csv_os3->is_open())
+    {
+        cout << "\nFrequency of outputs as ring members csv saved as: " << out_csv_file3 << '\n';
         csv_os3->close();
+    }
 
 } // if (ring_members)
 

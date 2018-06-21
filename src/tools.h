@@ -100,7 +100,7 @@ namespace xmreg
     timestamp_to_str(time_t timestamp, const char* format = "%F %T");
 
     std::string my_get_account_address_as_str(
-            bool testnet, account_public_address const & adr);
+            network_type nettype, account_public_address const & adr);
 
 //    ostream&
 //    operator<< (ostream& os, const address_parse_info& addr_info);
@@ -221,6 +221,11 @@ namespace xmreg
     // crypto::public_key wallet2::get_tx_pub_key_from_received_outs(const tools::wallet2::transfer_details &td) const
     public_key
     get_tx_pub_key_from_received_outs(const transaction &tx);
+
+    string
+    print_address(const address_parse_info& address,
+                  cryptonote::network_type nettype = cryptonote::network_type::MAINNET);
+
 }
 
 #endif //XMREG01_TOOLS_H

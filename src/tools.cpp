@@ -137,9 +137,9 @@ namespace xmreg
 
     std::string
     my_get_account_address_as_str(
-            bool testnet, account_public_address const & adr)
+            network_type nettype, account_public_address const & adr)
     {
-        uint64_t address_prefix = testnet ?
+        uint64_t address_prefix = nettype ?
                                   config::testnet::CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX
                                   : config::CRYPTONOTE_PUBLIC_ADDRESS_BASE58_PREFIX;
 
@@ -791,6 +791,18 @@ namespace xmreg
         }
 
         return null_pkey;
+    }
+
+
+    /**
+    * Return string representation of monero address
+    */
+    string
+    print_address(const address_parse_info& address_info, cryptonote::network_type nettype)
+    {
+        return "<" + get_account_address_as_str(
+                nettype, address_info.is_subaddress, address_info.address)
+               + ">";
     }
 
 
