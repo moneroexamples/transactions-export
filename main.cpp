@@ -277,7 +277,7 @@ if (ring_members)
     }
 
     // write the header of the csv file to be created
-    *csv_os2 << "Timestamp" << "Output_pub_key" << "Tx_hash"
+    *csv_os2 << "Timestamp" << "Block_no"  << "Tx_hash" << "Output_pub_key"
              << "Key_image" << "ring_no/ring_size"
              << NEWLINE;
 }
@@ -638,9 +638,9 @@ for (uint64_t i = start_height; i < height; ++i)
                          << ", " << it->first
                          << ", tx hash: " << tx_hash << '\n';
 
-                    *csv_os2 << blk_time
-                             << epee::string_tools::pod_to_hex(it->first)
+                    *csv_os2 << blk_time << i
                              << epee::string_tools::pod_to_hex(tx_hash)
+                             << epee::string_tools::pod_to_hex(it->first)
                              << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
                              << std::to_string(count + 1) + "/" + std::to_string(ring_size)
                              << NEWLINE;
