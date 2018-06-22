@@ -29,6 +29,8 @@ namespace xmreg
                  "private spend key string")
                 ("start-height,t", value<size_t>(),
                  "start from given height")
+                ("stop-height,g", value<size_t>()->default_value(0),
+                 "stop scan at the given height. 0 is scan till end")
                 ("no-of-blocks,n", value<size_t>()->default_value(0),
                  "number of blocks to search starting from start-height (0 = all blocks)")
                 ("start-date,d", value<string>(),

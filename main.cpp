@@ -38,6 +38,7 @@ auto address_opt         = opts.get_option<string>("address");
 auto viewkey_opt         = opts.get_option<string>("viewkey");
 auto spendkey_opt        = opts.get_option<string>("spendkey");
 auto start_height_opt    = opts.get_option<size_t>("start-height");
+auto stop_height_opt     = opts.get_option<size_t>("stop-height");
 auto no_of_blocks_opt    = opts.get_option<size_t>("no-of-blocks");
 auto start_date_opt      = opts.get_option<string>("start-date");
 auto out_csv_file_opt    = opts.get_option<string>("out-csv-file");  // for our outputs only
@@ -61,6 +62,7 @@ string viewkey_str   = viewkey_opt ? *viewkey_opt
 string spendkey_str  = spendkey_opt ? *spendkey_opt
                       : "";
 size_t start_height  = start_height_opt ? *start_height_opt : 0;
+size_t stop_height   = *stop_height_opt;
 size_t no_of_blocks  = *no_of_blocks_opt;
 string start_date    = start_date_opt ? *start_date_opt : "1970-01-01";
 
@@ -130,13 +132,15 @@ if (!xmreg::init_blockchain(blockchain_path.string(),
 
 // get the current blockchain height. Just to check
 // if it reads ok.
-uint64_t height = core_storage->get_current_blockchain_height();
+uint64_t height = stop_height == 0 ? core_storage->get_current_blockchain_height() : stop_height + 1;
 
 if (start_height > height)
 {
     cerr << "Given height is greater than blockchain height" << '\n';
     return EXIT_FAILURE;
 }
+
+
 
 
 if (start_date_opt)
