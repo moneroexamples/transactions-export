@@ -8,8 +8,7 @@
 #include <iostream>
 
 #include "monero_headers.h"
-#include "tx_details.h"
-
+#include "tools.h"
 
 namespace xmreg
 {
@@ -34,18 +33,19 @@ namespace xmreg
 
         hw::device* m_device;
 
+        network_type nettype;
+
     public:
         MicroCore();
 
         bool
-        init(const string& _blockchain_path);
+        init(const string& _blockchain_path, network_type nt);
 
         Blockchain&
         get_core();
 
         bool
         get_block_by_height(const uint64_t& height, block& blk);
-
 
         bool
         get_block_by_date(const string& date, /* searched date */
@@ -77,7 +77,6 @@ namespace xmreg
         string
         get_blkchain_path();
 
-
         hw::device* const
         get_device() const;
 
@@ -85,11 +84,12 @@ namespace xmreg
     };
 
 
+
     bool
     init_blockchain(const string& path,
                     MicroCore& mcore,
-                    Blockchain*& core_storage);
-
+                    Blockchain*& core_storage,
+                    network_type nt);
 
 
 }

@@ -124,7 +124,7 @@ cryptonote::Blockchain* core_storage;
 
 // initialize mcore and core_storage
 if (!xmreg::init_blockchain(blockchain_path.string(),
-                            mcore, core_storage))
+                            mcore, core_storage, nettype))
 {
     cerr << "Error accessing blockchain." << '\n';
     return EXIT_FAILURE;
