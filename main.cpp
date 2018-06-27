@@ -381,9 +381,18 @@ for (uint64_t i = start_height; i < height; ++i)
 
         if (all_outputs == false)
         {
-            // output only our outputs
-            found_outputs = xmreg::get_belonging_outputs(
-                    blk, tx, address, prv_view_key, i);
+            try
+            {
+                // output only our outputs
+                found_outputs = xmreg::get_belonging_outputs(
+                        blk, tx, address, prv_view_key, i);
+            }
+            catch (std::exception const& e)
+            {
+                cerr << e.what() << " for tx: " << epee::string_tools::pod_to_hex(tx_hash)
+                     << " Skipping this tx!" << endl;
+                continue;
+            }
         }
         else
         {
