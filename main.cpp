@@ -363,8 +363,8 @@ for (uint64_t i = start_height; i < height; ++i)
     // get all transactions in the block found
     // initialize the first list with transaction for solving
     // the block i.e. coinbase.
-    list<cryptonote::transaction> txs {blk.miner_tx};
-    list<crypto::hash> missed_txs;
+    vector<cryptonote::transaction> txs {blk.miner_tx};
+    vector<crypto::hash> missed_txs;
 
     if (!mcore.get_core().get_transactions(blk.tx_hashes, txs, missed_txs))
     {
