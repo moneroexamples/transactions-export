@@ -27,9 +27,10 @@ cd ~
 
 git clone https://github.com/monero-project/monero
 
-cd monero/
+cd monero && git submodule init && git submodule update
 
-make
+# build using 4 threads
+make -j 4
 ```
 
 
@@ -43,7 +44,7 @@ as follows:
 cd ~
 
 # download the source code
-https://github.com/moneroexamples/transactions-export.git
+git clone https://github.com/moneroexamples/transactions-export.git
 
 # enter the downloaded sourced code folder
 cd transactions-export
