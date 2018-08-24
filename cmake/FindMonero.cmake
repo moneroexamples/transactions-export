@@ -30,7 +30,8 @@
 
 set(LIBS common;blocks;cryptonote_basic;cryptonote_core;
 		cryptonote_protocol;daemonizer;mnemonics;epee;lmdb;device;
-		blockchain_db;ringct;wallet;cncrypto;easylogging;version;checkpoints)
+                blockchain_db;ringct;wallet;cncrypto;easylogging;version;
+                checkpoints)
 
 set(Xmr_INCLUDE_DIRS "${CPP_MONERO_DIR}")
 
@@ -82,4 +83,4 @@ include_directories(
 		${MONERO_SOURCE_DIR}/external/easylogging++
 		${MONERO_SOURCE_DIR}/contrib/epee/include
 		${MONERO_SOURCE_DIR}/version
-		${MONERO_SOURCE_DIR}/external/db_drivers/liblmdb)
+                ${MONERO_SOURCE_DIR}/external/db_drivers/liblmdb)

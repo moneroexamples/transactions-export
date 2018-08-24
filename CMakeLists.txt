@@ -99,6 +99,7 @@ set(LIBRARIES
         easylogging
         device
         pcsclite
+        sodium
         fmt::fmt-header-only
 	pcsclite
         ${Boost_LIBRARIES}
