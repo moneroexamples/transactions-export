@@ -1,6 +1,7 @@
 .DS_Store
 .sass-cache
 *.*~
+*.user
 .idea/
 build/
 cmake-build-debug/
