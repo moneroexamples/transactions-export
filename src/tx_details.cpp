@@ -82,7 +82,7 @@ namespace xmreg
            << " out idx: "     << td.m_internal_output_index
            << " out pk:  "     << td.out_pub_key
            << " key img:  "    << td.key_img
-           << " amount: "      << print_money(td.amount());
+           << " amount: "      << td.m_amount; //print_money(td.amount());
 
         return os;
     }
@@ -451,7 +451,8 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << td.m_tx.version;
     ostm << payment_id_str.substr(1, tx_hash_str.length()-2);
     ostm << td.m_internal_output_index;
-    ostm << cryptonote::print_money(td.m_amount);
+    //ostm << cryptonote::print_money(td.m_amount);
+    ostm << td.m_amount;
     ostm << out_pk_str.substr(1, out_pk_str.length()-2);
     ostm << key_img.substr(1, out_pk_str.length()-2);
     ostm << td.m_spent;
