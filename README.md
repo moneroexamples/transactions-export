@@ -10,7 +10,7 @@ its ring members.
 
 
 
-## Compilation on Ubuntu 16.04
+## Compilation on Ubuntu 18.04
 
 ##### Compile latest Monero 
 
@@ -20,17 +20,15 @@ Download and compile recent Monero into your home folder:
 # first install monero dependecines
 sudo apt update
 
-sudo apt install git build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev libsodium-dev pkg-config libssl-dev libcurl4-openssl-dev libgtest-dev libreadline-dev libzmq3-dev libsodium-dev libpcsclite-dev
+sudo apt install git build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev pkg-config libssl-dev libcurl4-openssl-dev libgtest-dev libreadline-dev libzmq3-dev libsodium-dev libpcsclite-dev
 
 # go to home folder
 cd ~
 
-git clone https://github.com/monero-project/monero
-
-cd monero && git submodule init && git submodule update
+git clone --recursive https://github.com/monero-project/monero
 
 # build using 4 threads
-make -j 4
+USE_SINGLE_BUILDDIR=1 make -j 4
 ```
 
 
