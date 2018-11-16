@@ -55,6 +55,7 @@ include_directories(
 )
 
 
+
 add_subdirectory(ext/fmt)
 
 # add src/ subfolder
@@ -98,7 +99,6 @@ set(LIBRARIES
         epee
         easylogging
         device
-        pcsclite
         sodium
         fmt::fmt-header-only
 	pcsclite
@@ -135,5 +135,8 @@ if (WIN32)
 else()
     set(LIBRARIES ${LIBRARIES} dl)
 endif()
+
+find_package(HIDAPI)
+set(LIBRARIES ${LIBRARIES} ${HIDAPI_LIBRARIES})
 
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})

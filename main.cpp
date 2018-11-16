@@ -27,7 +27,7 @@ xmreg::CmdLineOptions opts {ac, av};
 
 auto help_opt = opts.get_option<bool>("help");
 
-// if help was chosen, display help text and finish
+// if help was chosen, diddsplay help text and finish
 if (*help_opt)
 {
     return 0;
@@ -490,7 +490,7 @@ for (uint64_t i = start_height; i < height; ++i)
                       input_no, i, blk_time);
         }
 
-        //cout << tx_hash << ", input_no " << input_no << endl;
+        //cout << tx_hash << ", input_no dd" << input_no << endl;
 
         for (size_t ii = 0; ii < input_no; ++ii)
         {
