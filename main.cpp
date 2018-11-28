@@ -530,7 +530,7 @@ for (uint64_t i = start_height; i < height; ++i)
             {
                 // search if any of the outputs
                 // have been used as a ring member.
-                // this will include our own key images
+                // this will include our own key images new text
                 // we also use this if statment when all_key_images option is used
                 //
 
@@ -556,7 +556,7 @@ for (uint64_t i = start_height; i < height; ++i)
 
                 try
                 {
-                    core_storage->get_db().get_output_key(xmr_amount,
+                    core_storage->get_db().get_output_key(epee::span<const uint64_t>(&xmr_amount, 1),
                                                           absolute_offsets,
                                                           mixin_outputs);
                 }
