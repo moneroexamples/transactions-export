@@ -556,7 +556,7 @@ for (uint64_t i = start_height; i < height; ++i)
 
                 try
                 {
-                    core_storage->get_db().get_output_key(epee::span<const uint64_t>(&xmr_amount, 1),
+                    core_storage->get_db().get_output_key(xmr_amount,
                                                           absolute_offsets,
                                                           mixin_outputs);
                 }
