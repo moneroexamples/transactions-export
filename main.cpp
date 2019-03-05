@@ -428,9 +428,10 @@ for (uint64_t i = start_height; i < height; ++i)
 
                     if (!generate_key_derivation(pub_tx_key, prv_view_key, derivation))
                     {
-                        cerr << "Cant get derived key for output with: \n"
-                             << "pub_tx_key: " << prv_view_key << '\n';
-                        return EXIT_FAILURE;
+                        cout << "Cant get derived key for output with: \n"
+                             << "pub_tx_key: " << prv_view_key << " skipping" 
+                             <<  '\n';
+                        continue;
                     }
 
                     // generate key_image of this output
