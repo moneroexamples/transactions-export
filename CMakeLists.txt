@@ -99,6 +99,7 @@ set(LIBRARIES
         epee
         easylogging
         device
+        version
         sodium
         fmt::fmt-header-only
 	pcsclite
