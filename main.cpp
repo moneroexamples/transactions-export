@@ -557,9 +557,9 @@ for (uint64_t i = start_height; i < height; ++i)
 
                 try
                 {
-                    core_storage->get_db().get_output_key(xmr_amount,
-                                                          absolute_offsets,
-                                                          mixin_outputs);
+                    core_storage->get_db().get_output_key(
+                            epee::span<uint64_t const>(&xmr_amount, 1),
+                            absolute_offsets, mixin_outputs);
                 }
                 catch (const cryptonote::OUTPUT_DNE& e)
                 {

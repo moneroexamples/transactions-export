@@ -51,10 +51,7 @@ find_package(Boost COMPONENTS
 # include boost headers
 include_directories(
         ${Boost_INCLUDE_DIRS}
-        ${CMAKE_SOURCE_DIR}/ext/fmt
-)
-
-
+        ${CMAKE_SOURCE_DIR}/ext/fmt)
 
 add_subdirectory(ext/fmt)
 
@@ -72,12 +69,8 @@ set(SOURCE_FILES
 add_executable(${PROJECT_NAME}
         ${SOURCE_FILES})
 
-
 set_target_properties(${PROJECT_NAME}
         PROPERTIES LINKER_LANGUAGE CXX)
-
-#target_link_libraries(myext
-#        PRIVATE fmt::fmt-header-only)
 
 set(LIBRARIES
         myxrm
@@ -102,7 +95,7 @@ set(LIBRARIES
         version
         sodium
         fmt::fmt-header-only
-	pcsclite
+	    pcsclite
         ${Boost_LIBRARIES}
         pthread
         unbound
