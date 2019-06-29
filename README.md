@@ -14,24 +14,9 @@ its ring members.
 
 ##### Compile latest Monero 
 
-Download and compile recent Monero into your home folder:
+Download and compile recent Monero into your home folder as shown in the following link:
 
-```bash
-# first install monero dependecines
-sudo apt update
-
-sudo apt install git build-essential cmake libboost-all-dev miniupnpc libunbound-dev graphviz doxygen libunwind8-dev pkg-config libssl-dev libcurl4-openssl-dev libgtest-dev libreadline-dev libzmq3-dev libsodium-dev libpcsclite-dev
-
-# go to home folder
-cd ~
-
-# download monero sourced for branch release-v0.13 
-git clone --recursive -b release-v0.13 https://github.com/monero-project/monero.git
-
-# build using 4 threads
-USE_SINGLE_BUILDDIR=1 make -j 4
-```
-
+https://github.com/moneroexamples/monero-compilation#example-compilation-of-monero-on-ubuntu-1804
 
 ##### Compile the transactions-export
 
