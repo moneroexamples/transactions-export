@@ -91,6 +91,8 @@ set(LIBRARIES
         mnemonics
         epee
         easylogging
+        randomx
+        hardforks
         device
         version
         sodium
