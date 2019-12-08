@@ -5,6 +5,9 @@
 Usage:
   manage.py release [<branch>]
   manage.py site
+
+For the release command $FMT_TOKEN should contain a GitHub personal access token
+obtained from https://github.com/settings/tokens.
 """
 
 from __future__ import print_function
@@ -141,6 +144,8 @@ def update_site(env):
                 b.data = re.sub(pattern, r'doxygenfunction:: \1(int)', b.data)
                 b.data = b.data.replace('std::FILE*', 'std::FILE *')
                 b.data = b.data.replace('unsigned int', 'unsigned')
+                b.data = b.data.replace('operator""_', 'operator"" _')
+                b.data = b.data.replace(', size_t', ', std::size_t')
         # Fix a broken link in index.rst.
         index = os.path.join(target_doc_dir, 'index.rst')
         with rewrite(index) as b:
@@ -151,7 +156,9 @@ def update_site(env):
         if os.path.exists(html_dir):
             shutil.rmtree(html_dir)
         include_dir = env.fmt_repo.dir
-        if LooseVersion(version) >= LooseVersion('3.0.0'):
+        if LooseVersion(version) >= LooseVersion('5.0.0'):
+            include_dir = os.path.join(include_dir, 'include', 'fmt')
+        elif LooseVersion(version) >= LooseVersion('3.0.0'):
             include_dir = os.path.join(include_dir, 'fmt')
         import build
         build.build_docs(version, doc_dir=target_doc_dir,
@@ -231,13 +238,23 @@ def release(args):
 
     # Create a release on GitHub.
     fmt_repo.push('origin', 'release')
+    params = {'access_token': os.getenv('FMT_TOKEN')}
     r = requests.post('https://api.github.com/repos/fmtlib/fmt/releases',
-                      params={'access_token': os.getenv('FMT_TOKEN')},
+                      params=params,
                       data=json.dumps({'tag_name': version,
                                        'target_commitish': 'release',
                                        'body': changes, 'draft': True}))
     if r.status_code != 201:
         raise Exception('Failed to create a release ' + str(r))
+    id = r.json()['id']
+    uploads_url = 'https://uploads.github.com/repos/fmtlib/fmt/releases'
+    package = 'fmt-{}.zip'.format(version)
+    r = requests.post(
+        '{}/{}/assets?name={}'.format(uploads_url, id, package),
+        headers={'Content-Type': 'application/zip'},
+        params=params, data=open('build/fmt/' + package, 'rb'))
+    if r.status_code != 201:
+        raise Exception('Failed to upload an asset ' + str(r))
 
 
 if __name__ == '__main__':
