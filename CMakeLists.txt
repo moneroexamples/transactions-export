@@ -8,9 +8,33 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -std=c++14")
 
-
 if (NOT MONERO_DIR)
     set(MONERO_DIR ~/monero)
+endif()
+
+message(STATUS MONERO_DIR ": ${MONERO_DIR}")
+
+if (NOT MONERO_SOURCE_DIR)
+    set(MONERO_SOURCE_DIR ${MONERO_DIR}
+          CACHE PATH "Path to the root directory for Monero")
+endif()
+
+if (NOT MONERO_BUILD_DIR)
+    # set location of monero build tree
+    set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/release/
+          CACHE PATH "Path to the build directory for Monero")
+
+   if (NOT EXISTS ${MONERO_BUILD_DIR})
+        # try different location
+        message(STATUS "Trying different folder for monero libraries")
+        set(MONERO_BUILD_DIR ${MONERO_SOURCE_DIR}/build/Linux/master/release/
+            CACHE PATH "Path to the build directory for Monero" FORCE)
+    endif()
+
+endif()
+
+if (NOT EXISTS ${MONERO_BUILD_DIR})
+  message(FATAL_ERROR "Monero libraries not found in: ${MONERO_BUILD_DIR}")
 endif()
 
 message(STATUS MONERO_DIR ": ${MONERO_DIR}")
@@ -53,6 +77,14 @@ include_directories(
         ${Boost_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/ext/fmt)
 
+message("Xmr_WALLET-CRYPTO_LIBRARIES ${Xmr_WALLET-CRYPTO_LIBRARIES}")
+
+if("${Xmr_WALLET-CRYPTO_LIBRARIES}" STREQUAL "Xmr_WALLET-CRYPTO_LIBRARY-NOTFOUND")
+  set(WALLET_CRYPTO "")
+else()
+  set(WALLET_CRYPTO ${Xmr_WALLET-CRYPTO_LIBRARIES})
+endif()
+
 add_subdirectory(ext/fmt)
 
 # add src/ subfolder
@@ -76,6 +108,8 @@ set(LIBRARIES
         myxrm
         myext
         wallet
+        device
+         ${WALLET_CRYPTO}
         blockchain_db
         cryptonote_core
         cryptonote_protocol
@@ -86,7 +120,6 @@ set(LIBRARIES
         lmdb
         ringct
         ringct_basic
-        device
         common
         mnemonics
         epee
