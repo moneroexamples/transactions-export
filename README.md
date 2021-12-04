@@ -10,13 +10,13 @@ its ring members.
 
 
 
-## Compilation on Ubuntu 18.04
+## Compilation on Ubuntu 20.04
 
 ##### Compile latest Monero 
 
 Download and compile recent Monero into your home folder as shown in the following link:
 
-https://github.com/moneroexamples/monero-compilation#example-compilation-of-monero-on-ubuntu-1804
+https://github.com/moneroexamples/monero-compilation#example-compilation-of-master-branch-ie-development-version-of-monero-on-ubuntu-2004
 
 ##### Compile the transactions-export
 
