@@ -112,6 +112,7 @@ set(LIBRARIES
          ${WALLET_CRYPTO}
         blockchain_db
         cryptonote_core
+        cryptonote_format_utils_basic
         cryptonote_protocol
         cryptonote_basic
         daemonizer
