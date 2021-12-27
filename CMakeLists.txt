@@ -105,11 +105,12 @@ set_target_properties(${PROJECT_NAME}
         PROPERTIES LINKER_LANGUAGE CXX)
 
 set(LIBRARIES
+		${Boost_LIBRARIES}
         myxrm
         myext
         wallet
         device
-         ${WALLET_CRYPTO}
+        ${WALLET_CRYPTO}
         blockchain_db
         cryptonote_core
         cryptonote_format_utils_basic
@@ -131,7 +132,6 @@ set(LIBRARIES
         version
         sodium
         fmt::fmt-header-only
-        ${Boost_LIBRARIES}
         pthread
         unbound
         curl
