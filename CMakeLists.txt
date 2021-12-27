@@ -131,7 +131,6 @@ set(LIBRARIES
         version
         sodium
         fmt::fmt-header-only
-	    pcsclite
         ${Boost_LIBRARIES}
         pthread
         unbound
