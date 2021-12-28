@@ -691,11 +691,11 @@ if (all_key_images && csv_os4->is_open())
 
 
 // set timezone to orginal value
-if (tz_org != 0)
-{
-    setenv("TZ", old_tz, 1);
-    tzset();
-}
+//if (tz_org != 0)
+//{
+//    setenv("TZ", old_tz, 1);
+//    tzset();
+//}
 
 
 

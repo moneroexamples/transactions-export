@@ -340,11 +340,11 @@ MicroCore::get_blk_timestamp(uint64_t blk_height)
  * need to manually free memory taken on heap
  * by BlockchainLMDB
  */
-MicroCore::~MicroCore()
-{
-    //m_blockchain_storage.get_db().close();
-    delete &m_blockchain_storage.get_db();
-}
+//MicroCore::~MicroCore()
+//{
+//    //m_blockchain_storage.get_db().close();
+//    delete &m_blockchain_storage.get_db();
+//}
 
 
 bool
