@@ -105,7 +105,6 @@ set_target_properties(${PROJECT_NAME}
         PROPERTIES LINKER_LANGUAGE CXX)
 
 set(LIBRARIES
-		${Boost_LIBRARIES}
         myxrm
         myext
         wallet
@@ -132,6 +131,7 @@ set(LIBRARIES
         version
         sodium
         fmt::fmt-header-only
+		${Boost_LIBRARIES}
         pthread
         unbound
         curl
