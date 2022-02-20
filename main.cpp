@@ -351,6 +351,12 @@ unordered_map<crypto::public_key, tuple<uint64_t, vector<uint64_t>>> ring_member
 // simple as veryfing if a given key_image exist in our vector.
 vector<crypto::key_image> key_images_gen;
 
+
+// to easly verify location of the real output in a ringct signature, we
+// store that info in a map
+//            key image        , corresponding output public key
+unordered_map<crypto::key_image, crypto::public_key> key_image_and_output;
+
 size_t blk_counter {0};
 
 for (uint64_t i = start_height; i < height; ++i)
@@ -472,6 +478,9 @@ for (uint64_t i = start_height; i < height; ++i)
 
                     key_images_gen.push_back(key_img);
 
+                    // save output's public key and its key image
+                    key_image_and_output[key_img] = pub_tx_key;
+
                     // copy key_image to tr_details to be saved
                     tr_details.key_img = key_img;
 
@@ -540,7 +549,7 @@ for (uint64_t i = start_height; i < height; ++i)
             bool our_key_image = (it != key_images_gen.end());
 
             if (our_key_image)
-            {
+            {                
                 cout << " - found our input: " << ", " << tx_in_to_key.k_image
                      << ", amount: " << cryptonote::print_money(tx_in_to_key.amount)
                      << '\n';
@@ -550,7 +559,7 @@ for (uint64_t i = start_height; i < height; ++i)
             {
                 // search if any of the outputs
                 // have been used as a ring member.
-                // this will include our own key images new text
+                // this will include our own key images
                 // we also use this if statment when all_key_images option is used
                 //
 
@@ -597,9 +606,8 @@ for (uint64_t i = start_height; i < height; ++i)
                     // get basic information about mixn's output
                     cryptonote::output_data_t output_data = mixin_outputs.at(count);
 
-                    // before going to the mysql, check our known outputs cash
-                    // if the key exists. Its much faster than going to mysql
-                    // for this.
+                    //  check our known outputs cache
+                    // if the key exists.
 
                     auto it =  std::find_if(
                             known_outputs_keys.begin(),
@@ -649,7 +657,8 @@ for (uint64_t i = start_height; i < height; ++i)
 
                         ++count;
                         continue;
-                    }
+
+                    } // if (all_key_images)
 
                     if (it == known_outputs_keys.end())
                     {
@@ -708,6 +717,11 @@ if (all_key_images && csv_os4->is_open())
     csv_os4->close();
 }
 
+if (spendkey_opt && csv_os5->is_open())
+{
+    cout << "\nOutgoing transactions csv saved as: " << out_csv_file5 << '\n';
+    csv_os4->close();
+}
 
 // set timezone to orginal value
 //if (tz_org != 0)
