@@ -45,6 +45,7 @@ auto out_csv_file_opt    = opts.get_option<string>("out-csv-file");  // for our 
 auto out_csv_file2_opt   = opts.get_option<string>("out-csv-file2"); // for our outputs as ring members in other txs
 auto out_csv_file3_opt   = opts.get_option<string>("out-csv-file3"); // for frequency of outputs as ring members in other txs
 auto out_csv_file4_opt   = opts.get_option<string>("out-csv-file4"); // for all key_images with referenced output public keys
+auto out_csv_file5_opt   = opts.get_option<string>("out-csv-file5"); // for outgoing txs with marked real output spent (ring_no/ring_size)
 auto bc_path_opt         = opts.get_option<string>("bc-path");
 auto testnet_opt         = opts.get_option<bool>("testnet");
 auto stagenet_opt        = opts.get_option<bool>("stagenet");
@@ -70,6 +71,7 @@ string out_csv_file  = *out_csv_file_opt;
 string out_csv_file2 = *out_csv_file2_opt;
 string out_csv_file3 = *out_csv_file3_opt;
 string out_csv_file4 = *out_csv_file4_opt;
+string out_csv_file5 = *out_csv_file5_opt;
 
 bool testnet         = *testnet_opt;
 bool stagenet        = *stagenet_opt;
@@ -77,7 +79,6 @@ bool ring_members    = *ring_members_opt ;
 bool all_outputs     = *all_outputs_opt;
 bool all_key_images  = *all_key_images_opt;
 bool SPEND_KEY_GIVEN = (spendkey_str.empty() ? false : true);
-
 
 if (testnet && stagenet)
 {
@@ -303,6 +304,24 @@ if (all_key_images)
              << NEWLINE;
 }
 
+unique_ptr<csv::ofstream> csv_os5;
+
+if (spendkey_opt)
+{
+    csv_os5.reset(new csv::ofstream {out_csv_file5.c_str()});
+
+    if (!csv_os5->is_open())
+    {
+        cerr << "Cant open file: " << out_csv_file5 << '\n';
+        return EXIT_FAILURE;
+    }
+
+    // write the header of the csv file to be created
+    *csv_os5 << "Timestamp" << "Block_no" << "Tx_hash"
+             << "Output_pub_key" << "Key_image"
+             << "Ring_no/Ring_size"
+             << NEWLINE;
+}
 
 
 // show command line output for every i-th block

@@ -44,6 +44,9 @@ namespace xmreg
                 ("out-csv-file4,r", value<string>()->default_value("xmr_report_key_images_outputs.csv"),
                  "name of outputs csv file for file containing all key "
                          "images scanned with the referenced output public keys")
+                ("out-csv-file5,r", value<string>()->default_value("xmr_report_outgoing_txs.csv"),
+                 "locate outgoing transactions with marked real mixin in key images. "
+                         "This requires spend key.")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain")
                 ("testnet",  value<bool>()->default_value(false)->implicit_value(true),
