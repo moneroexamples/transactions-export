@@ -258,8 +258,8 @@ namespace xmreg
      */
     vector<xmreg::transfer_details>
     get_outputs(const block& blk,
-                          const transaction& tx,
-                          uint64_t block_height)
+                const transaction& tx,
+                uint64_t block_height)
     {
         // vector to be returned
         vector<xmreg::transfer_details> our_outputs;
@@ -294,8 +294,6 @@ namespace xmreg
         {
             return our_outputs;
         }
-
-
 
         // sum amount of xmr sent to us
         // in the given transaction

@@ -414,7 +414,8 @@ for (uint64_t i = start_height; i < height; ++i)
             }
             catch (std::exception const& e)
             {
-                cerr << e.what() << " for tx: " << epee::string_tools::pod_to_hex(tx_hash)
+                cerr << e.what() << " for tx: "
+                     << epee::string_tools::pod_to_hex(tx_hash)
                      << " Skipping this tx!" << endl;
                 continue;
             }
@@ -462,11 +463,12 @@ for (uint64_t i = start_height; i < height; ++i)
                     // generate key_image of this output
                     crypto::key_image key_img;
 
-                    if (!xmreg::generate_key_image(derivation,
-                                                   tr_details.m_internal_output_index, /* position in the tx */
-                                                   prv_spend_key,
-                                                   account_keys.m_account_address.m_spend_public_key,
-                                                   key_img))
+                    if (!xmreg::generate_key_image(
+                                derivation,
+                                tr_details.m_internal_output_index, /* position in the tx */
+                                prv_spend_key,
+                                account_keys.m_account_address.m_spend_public_key,
+                                key_img))
                     {
                         cerr << "Cant generate key image for output: "
                              << tr_details.out_pub_key << '\n';
@@ -479,7 +481,7 @@ for (uint64_t i = start_height; i < height; ++i)
                     key_images_gen.push_back(key_img);
 
                     // save output's public key and its key image
-                    key_image_and_output[key_img] = pub_tx_key;
+                    key_image_and_output[key_img] = tr_details.out_pub_key;
 
                     // copy key_image to tr_details to be saved
                     tr_details.key_img = key_img;
@@ -550,9 +552,63 @@ for (uint64_t i = start_height; i < height; ++i)
 
             if (our_key_image)
             {                
-                cout << " - found our input: " << ", " << tx_in_to_key.k_image
+
+                // since we have found our input (key image matches), lets out at which location
+                // is our mixin (i.e. output public key in the key image)
+
+                auto const& it = key_image_and_output.find(tx_in_to_key.k_image);
+
+                // find position of our mixin in the key image
+                // to do this we need mixin absolute offests
+
+                // get absolute offsets of mixins
+                std::vector<uint64_t> absolute_offsets
+                        = cryptonote::relative_output_offsets_to_absolute(
+                                tx_in_to_key.key_offsets);
+
+                // get public keys of outputs used in the mixins
+                // that match to the offests
+                std::vector<cryptonote::output_data_t> mixin_outputs;
+
+                try
+                {
+                    core_storage->get_db().get_output_key(
+                            epee::span<uint64_t const>(&xmr_amount, 1),
+                            absolute_offsets, mixin_outputs);
+                }
+                catch (const cryptonote::OUTPUT_DNE& e)
+                {
+                    cerr << "Mixins not found" << '\n';
+                    continue;
+                }
+
+                auto ring_size = mixin_outputs.size();
+
+                auto i = 0u;
+
+                for (i = 0; i < ring_size; ++i) {
+                    if (mixin_outputs[i].pubkey == it->second) {
+                        break;
+                    }
+                }
+
+
+                cout << " - found our input in tx "
+                     << epee::string_tools::pod_to_hex(tx_hash)
+                     << ", " << tx_in_to_key.k_image
                      << ", amount: " << cryptonote::print_money(tx_in_to_key.amount)
+                     << ", our mixin is " << it->second
+                     << "at position " << i << '/' << ring_size
                      << '\n';
+
+                *csv_os5 << blk_time << i
+                         << epee::string_tools::pod_to_hex(tx_hash)
+                         << epee::string_tools::pod_to_hex(it->second)
+                         << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
+                         << std::to_string(i + 1) + "/" + std::to_string(ring_size)
+                         << NEWLINE;
+
+                csv_os5->flush();
             }
 
             if ((ring_members && !our_key_image) || all_key_images)
@@ -591,7 +647,7 @@ for (uint64_t i = start_height; i < height; ++i)
                 }
                 catch (const cryptonote::OUTPUT_DNE& e)
                 {
-                    cerr << "Mixins key images not found" << '\n';
+                    cerr << "Mixins not found" << '\n';
                     continue;
                 }
 
@@ -615,7 +671,7 @@ for (uint64_t i = start_height; i < height; ++i)
                             [&](const pair<crypto::public_key, uint64_t>& known_output)
                             {
                                 return output_data.pubkey == known_output.first;
-                            });
+                            });                                        
 
                     if (all_key_images)
                     {
@@ -644,7 +700,7 @@ for (uint64_t i = start_height; i < height; ++i)
 
                             ++count;
                             continue;
-                        }
+                        }                             
 
                         *csv_os4 << blk_time << i << epee::string_tools::pod_to_hex(tx_hash)
                                  << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
@@ -720,7 +776,7 @@ if (all_key_images && csv_os4->is_open())
 if (spendkey_opt && csv_os5->is_open())
 {
     cout << "\nOutgoing transactions csv saved as: " << out_csv_file5 << '\n';
-    csv_os4->close();
+    csv_os5->close();
 }
 
 // set timezone to orginal value
