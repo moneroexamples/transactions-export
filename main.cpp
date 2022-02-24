@@ -584,9 +584,9 @@ for (uint64_t i = start_height; i < height; ++i)
 
                 auto ring_size = mixin_outputs.size();
 
-                auto i = 0u;
+                auto j = 0u;
 
-                for (i = 0; i < ring_size; ++i) {
+                for (j = 0; i < ring_size; ++j) {
                     if (mixin_outputs[i].pubkey == it->second) {
                         break;
                     }
