@@ -598,14 +598,14 @@ for (uint64_t i = start_height; i < height; ++i)
                      << ", " << tx_in_to_key.k_image
                      << ", amount: " << cryptonote::print_money(tx_in_to_key.amount)
                      << ", our mixin is " << it->second
-                     << "at position " << i << '/' << ring_size
+                     << "at position " << j << '/' << ring_size
                      << '\n';
 
                 *csv_os5 << blk_time << i
                          << epee::string_tools::pod_to_hex(tx_hash)
                          << epee::string_tools::pod_to_hex(it->second)
                          << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
-                         << std::to_string(i + 1) + "/" + std::to_string(ring_size)
+                         << std::to_string(j + 1) + "/" + std::to_string(ring_size)
                          << NEWLINE;
 
                 csv_os5->flush();
