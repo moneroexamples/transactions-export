@@ -587,7 +587,7 @@ for (uint64_t i = start_height; i < height; ++i)
                 auto j = 0u;
 
                 for (j = 0; i < ring_size; ++j) {
-                    if (mixin_outputs[i].pubkey == it->second) {
+                    if (mixin_outputs[j].pubkey == it->second) {
                         break;
                     }
                 }
