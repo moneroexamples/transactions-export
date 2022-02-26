@@ -605,7 +605,7 @@ for (uint64_t i = start_height; i < height; ++i)
                          << epee::string_tools::pod_to_hex(tx_hash)
                          << epee::string_tools::pod_to_hex(it->second)
                          << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
-                         << std::to_string(j + 1) + "/" + std::to_string(ring_size)
+                         << std::to_string(j) + "/" + std::to_string(ring_size)
                          << NEWLINE;
 
                 csv_os5->flush();
