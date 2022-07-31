@@ -10,7 +10,7 @@ its ring members.
 
 
 
-## Compilation on Ubuntu 20.04
+## Compilation on Ubuntu 22.04
 
 ##### Compile latest Monero 
 

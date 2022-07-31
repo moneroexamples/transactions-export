@@ -41,9 +41,12 @@ namespace xmreg
                  "name of outputs csv file for file containing  out outputs as ring members")
                 ("out-csv-file3,r", value<string>()->default_value("xmr_report_ring_members_freq.csv"),
                  "name of outputs csv file for file containing frequencies of outputs as ring members")
-                ("out-csv-file4,r", value<string>()->default_value("xmr_report_key_images_outputs.csv"),
+                ("out-csv-file4,r", value<string>()->default_value("xmr_report_real_outputs_in_key_images.csv"),
                  "name of outputs csv file for file containing all key "
                          "images scanned with the referenced output public keys")
+                ("out-csv-file5,r", value<string>()->default_value("xmr_report_outgoing_txs.csv"),
+                 "locate outgoing transactions with marked real mixin in key images. "
+                         "This requires spend key.")
                 ("bc-path,b", value<string>(),
                  "path to lmdb blockchain")
                 ("testnet",  value<bool>()->default_value(false)->implicit_value(true),

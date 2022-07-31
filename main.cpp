@@ -45,6 +45,7 @@ auto out_csv_file_opt    = opts.get_option<string>("out-csv-file");  // for our 
 auto out_csv_file2_opt   = opts.get_option<string>("out-csv-file2"); // for our outputs as ring members in other txs
 auto out_csv_file3_opt   = opts.get_option<string>("out-csv-file3"); // for frequency of outputs as ring members in other txs
 auto out_csv_file4_opt   = opts.get_option<string>("out-csv-file4"); // for all key_images with referenced output public keys
+auto out_csv_file5_opt   = opts.get_option<string>("out-csv-file5"); // for outgoing txs with marked real output spent (ring_no/ring_size)
 auto bc_path_opt         = opts.get_option<string>("bc-path");
 auto testnet_opt         = opts.get_option<bool>("testnet");
 auto stagenet_opt        = opts.get_option<bool>("stagenet");
@@ -70,6 +71,7 @@ string out_csv_file  = *out_csv_file_opt;
 string out_csv_file2 = *out_csv_file2_opt;
 string out_csv_file3 = *out_csv_file3_opt;
 string out_csv_file4 = *out_csv_file4_opt;
+string out_csv_file5 = *out_csv_file5_opt;
 
 bool testnet         = *testnet_opt;
 bool stagenet        = *stagenet_opt;
@@ -77,7 +79,6 @@ bool ring_members    = *ring_members_opt ;
 bool all_outputs     = *all_outputs_opt;
 bool all_key_images  = *all_key_images_opt;
 bool SPEND_KEY_GIVEN = (spendkey_str.empty() ? false : true);
-
 
 if (testnet && stagenet)
 {
@@ -303,6 +304,24 @@ if (all_key_images)
              << NEWLINE;
 }
 
+unique_ptr<csv::ofstream> csv_os5;
+
+if (spendkey_opt)
+{
+    csv_os5.reset(new csv::ofstream {out_csv_file5.c_str()});
+
+    if (!csv_os5->is_open())
+    {
+        cerr << "Cant open file: " << out_csv_file5 << '\n';
+        return EXIT_FAILURE;
+    }
+
+    // write the header of the csv file to be created
+    *csv_os5 << "Timestamp" << "Block_no" << "Tx_hash"
+             << "Output_pub_key" << "Key_image"
+             << "Ring_no/Ring_size"
+             << NEWLINE;
+}
 
 
 // show command line output for every i-th block
@@ -331,6 +350,12 @@ unordered_map<crypto::public_key, tuple<uint64_t, vector<uint64_t>>> ring_member
 // this way, checking which input is ours, is as
 // simple as veryfing if a given key_image exist in our vector.
 vector<crypto::key_image> key_images_gen;
+
+
+// to easly verify location of the real output in a ringct signature, we
+// store that info in a map
+//            key image        , corresponding output public key
+unordered_map<crypto::key_image, crypto::public_key> key_image_and_output;
 
 size_t blk_counter {0};
 
@@ -389,7 +414,8 @@ for (uint64_t i = start_height; i < height; ++i)
             }
             catch (std::exception const& e)
             {
-                cerr << e.what() << " for tx: " << epee::string_tools::pod_to_hex(tx_hash)
+                cerr << e.what() << " for tx: "
+                     << epee::string_tools::pod_to_hex(tx_hash)
                      << " Skipping this tx!" << endl;
                 continue;
             }
@@ -437,11 +463,12 @@ for (uint64_t i = start_height; i < height; ++i)
                     // generate key_image of this output
                     crypto::key_image key_img;
 
-                    if (!xmreg::generate_key_image(derivation,
-                                                   tr_details.m_internal_output_index, /* position in the tx */
-                                                   prv_spend_key,
-                                                   account_keys.m_account_address.m_spend_public_key,
-                                                   key_img))
+                    if (!xmreg::generate_key_image(
+                                derivation,
+                                tr_details.m_internal_output_index, /* position in the tx */
+                                prv_spend_key,
+                                account_keys.m_account_address.m_spend_public_key,
+                                key_img))
                     {
                         cerr << "Cant generate key image for output: "
                              << tr_details.out_pub_key << '\n';
@@ -452,6 +479,9 @@ for (uint64_t i = start_height; i < height; ++i)
                          << ",  key image: " << key_img << '\n';
 
                     key_images_gen.push_back(key_img);
+
+                    // save output's public key and its key image
+                    key_image_and_output[key_img] = tr_details.out_pub_key;
 
                     // copy key_image to tr_details to be saved
                     tr_details.key_img = key_img;
@@ -521,17 +551,71 @@ for (uint64_t i = start_height; i < height; ++i)
             bool our_key_image = (it != key_images_gen.end());
 
             if (our_key_image)
-            {
-                cout << " - found our input: " << ", " << tx_in_to_key.k_image
+            {                
+
+                // since we have found our input (key image matches), lets out at which location
+                // is our mixin (i.e. output public key in the key image)
+
+                auto const& it = key_image_and_output.find(tx_in_to_key.k_image);
+
+                // find position of our mixin in the key image
+                // to do this we need mixin absolute offests
+
+                // get absolute offsets of mixins
+                std::vector<uint64_t> absolute_offsets
+                        = cryptonote::relative_output_offsets_to_absolute(
+                                tx_in_to_key.key_offsets);
+
+                // get public keys of outputs used in the mixins
+                // that match to the offests
+                std::vector<cryptonote::output_data_t> mixin_outputs;
+
+                try
+                {
+                    core_storage->get_db().get_output_key(
+                            epee::span<uint64_t const>(&xmr_amount, 1),
+                            absolute_offsets, mixin_outputs);
+                }
+                catch (const cryptonote::OUTPUT_DNE& e)
+                {
+                    cerr << "Mixins not found" << '\n';
+                    continue;
+                }
+
+                auto ring_size = mixin_outputs.size();
+
+                auto j = 0u;
+
+                for (j = 0; j < ring_size; ++j) {
+                    if (mixin_outputs[j].pubkey == it->second) {
+                        break;
+                    }
+                }
+
+
+                cout << " - found our input in tx "
+                     << epee::string_tools::pod_to_hex(tx_hash)
+                     << ", " << tx_in_to_key.k_image
                      << ", amount: " << cryptonote::print_money(tx_in_to_key.amount)
+                     << ", our mixin is " << it->second
+                     << "at position " << j << '/' << ring_size
                      << '\n';
+
+                *csv_os5 << blk_time << i
+                         << epee::string_tools::pod_to_hex(tx_hash)
+                         << epee::string_tools::pod_to_hex(it->second)
+                         << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
+                         << std::to_string(j + 1) + "/" + std::to_string(ring_size)
+                         << NEWLINE;
+
+                csv_os5->flush();
             }
 
             if ((ring_members && !our_key_image) || all_key_images)
             {
                 // search if any of the outputs
                 // have been used as a ring member.
-                // this will include our own key images new text
+                // this will include our own key images
                 // we also use this if statment when all_key_images option is used
                 //
 
@@ -563,7 +647,7 @@ for (uint64_t i = start_height; i < height; ++i)
                 }
                 catch (const cryptonote::OUTPUT_DNE& e)
                 {
-                    cerr << "Mixins key images not found" << '\n';
+                    cerr << "Mixins not found" << '\n';
                     continue;
                 }
 
@@ -578,9 +662,8 @@ for (uint64_t i = start_height; i < height; ++i)
                     // get basic information about mixn's output
                     cryptonote::output_data_t output_data = mixin_outputs.at(count);
 
-                    // before going to the mysql, check our known outputs cash
-                    // if the key exists. Its much faster than going to mysql
-                    // for this.
+                    //  check our known outputs cache
+                    // if the key exists.
 
                     auto it =  std::find_if(
                             known_outputs_keys.begin(),
@@ -588,7 +671,7 @@ for (uint64_t i = start_height; i < height; ++i)
                             [&](const pair<crypto::public_key, uint64_t>& known_output)
                             {
                                 return output_data.pubkey == known_output.first;
-                            });
+                            });                                        
 
                     if (all_key_images)
                     {
@@ -617,7 +700,7 @@ for (uint64_t i = start_height; i < height; ++i)
 
                             ++count;
                             continue;
-                        }
+                        }                             
 
                         *csv_os4 << blk_time << i << epee::string_tools::pod_to_hex(tx_hash)
                                  << epee::string_tools::pod_to_hex(tx_in_to_key.k_image)
@@ -630,7 +713,8 @@ for (uint64_t i = start_height; i < height; ++i)
 
                         ++count;
                         continue;
-                    }
+
+                    } // if (all_key_images)
 
                     if (it == known_outputs_keys.end())
                     {
@@ -689,6 +773,11 @@ if (all_key_images && csv_os4->is_open())
     csv_os4->close();
 }
 
+if (spendkey_opt && csv_os5->is_open())
+{
+    cout << "\nOutgoing transactions csv saved as: " << out_csv_file5 << '\n';
+    csv_os5->close();
+}
 
 // set timezone to orginal value
 //if (tz_org != 0)
