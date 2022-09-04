@@ -647,6 +647,7 @@ namespace xmreg
                 case rct::RCTTypeBulletproof:
                 case rct::RCTTypeBulletproof2:
                 case rct::RCTTypeCLSAG:
+                case rct::RCTTypeBulletproofPlus:
                     amount = rct::decodeRctSimple(rv,
                                                   rct::sk2rct(scalar1),
                                                   i,

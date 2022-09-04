@@ -117,7 +117,6 @@ namespace xmreg
         }
 
 
-
         // get tx payment id
         crypto::hash payment_id;
 
@@ -178,12 +177,16 @@ namespace xmreg
                               addr.m_spend_public_key,
                               pubkey);
 
-            // get tx output public key
-            const txout_to_key tx_out_to_key
-                    = boost::get<txout_to_key>(tx.vout[i].target);
+            public_key output_pub_key;
+
+            if (!cryptonote::get_output_public_key(tx.vout[i], output_pub_key))
+            {
+                continue;
+            }
 
             // check if generated public key matches the current output's key
-            bool mine_output = (tx_out_to_key.key == pubkey);
+            //bool mine_output = (tx_out_to_key.key == pubkey);
+            bool mine_output = (output_pub_key == pubkey);
 
             // check if the output's public key is ours
             if (mine_output)
@@ -233,7 +236,7 @@ namespace xmreg
                                                  tx,
                                                  payment_id,
                                                  i,
-                                                 tx_out_to_key.key,
+                                                 output_pub_key,
                                                  key_image{},
                                                  false}
                 );
