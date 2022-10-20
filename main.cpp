@@ -262,6 +262,7 @@ if (!csv_os->is_open())
        << "Payment_id" << "Out_idx" << "Amount"
        << "Output_pub_key" << "Output_key_img"
        << "Output_spend"
+       << "Tx_fee"
        << NEWLINE;
 
 

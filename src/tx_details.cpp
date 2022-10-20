@@ -457,6 +457,7 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << out_pk_str.substr(1, out_pk_str.length()-2);
     ostm << key_img.substr(1, out_pk_str.length()-2);
     ostm << td.m_spent;
+    ostm << td.m_tx.rct_signatures.txnFee;
 
     return ostm;
 }
