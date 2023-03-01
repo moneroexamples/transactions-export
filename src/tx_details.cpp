@@ -313,10 +313,6 @@ namespace xmreg
             public_key output_pub_key;
             cryptonote::get_output_public_key(tx.vout[i], output_pub_key);
 
-            // get tx output public key
-//            const txout_to_key tx_out_to_key
-//                    = boost::get<txout_to_key>(tx.vout[i].target);
-
             // if so, then add this output to the
             // returned vector
             //our_outputs.push_back(tx.vout[i]);
@@ -467,7 +463,6 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << out_pk_str.substr(1, out_pk_str.length()-2);
     ostm << key_img.substr(1, out_pk_str.length()-2);
     ostm << td.m_spent;
-    //ostm << td.m_tx.rct_signatures.txnFee;
     ostm << fee;
 
     return ostm;
