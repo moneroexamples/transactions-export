@@ -310,9 +310,12 @@ namespace xmreg
         for (size_t i = 0; i < output_no; ++i)
         {
 
+            public_key output_pub_key;
+            cryptonote::get_output_public_key(tx.vout[i], output_pub_key);
+
             // get tx output public key
-            const txout_to_key tx_out_to_key
-                    = boost::get<txout_to_key>(tx.vout[i].target);
+//            const txout_to_key tx_out_to_key
+//                    = boost::get<txout_to_key>(tx.vout[i].target);
 
             // if so, then add this output to the
             // returned vector
@@ -325,7 +328,7 @@ namespace xmreg
                                              tx,
                                              payment_id,
                                              i,
-                                             tx_out_to_key.key,
+                                             output_pub_key,
                                              key_image{},
                                              false}
             );
@@ -444,6 +447,13 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ss << td.key_img;
     std::string key_img = ss.str();
 
+    uint64_t fee {0};
+
+    if (!is_coinbase(td.m_tx)) {
+        if (td.m_tx.vin.at(0).type() != typeid(cryptonote::txin_gen)) {
+          fee = get_tx_fee(td.m_tx);
+        }
+    }
 
     ostm << xmreg::timestamp_to_str(td.m_block_timestamp);
     ostm << td.m_block_height;
@@ -457,7 +467,8 @@ operator<<(csv::ofstream& ostm, const xmreg::transfer_details& td)
     ostm << out_pk_str.substr(1, out_pk_str.length()-2);
     ostm << key_img.substr(1, out_pk_str.length()-2);
     ostm << td.m_spent;
-    ostm << td.m_tx.rct_signatures.txnFee;
+    //ostm << td.m_tx.rct_signatures.txnFee;
+    ostm << fee;
 
     return ostm;
 }
