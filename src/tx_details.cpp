@@ -142,9 +142,7 @@ namespace xmreg
 
         if (!generate_key_derivation(pub_tx_key, private_view_key, derivation))
         {
-            cerr << "Cant get dervied key for: "  << "\n"
-                 << "pub_tx_key: " << private_view_key << " and "
-                 << "prv_view_key" << private_view_key << endl;
+            cerr << "Cant get derived key for transaction" << endl;
             return our_outputs;
         }
 

@@ -235,14 +235,6 @@ if (SPEND_KEY_GIVEN)
 
 
 // lets check our keys
-cout << '\n'
-     << "address          : " << xmreg::print_address(address_info, nettype) << '\n'
-     << "private view key : "  << prv_view_key << '\n';
-
-if (SPEND_KEY_GIVEN)
-    cout << "private spend key: " << prv_spend_key << '\n';
-else
-    cout << "private spend key: " << "not given\n";
 
 cout << '\n';
 
@@ -455,9 +447,7 @@ for (uint64_t i = start_height; i < height; ++i)
 
                     if (!generate_key_derivation(pub_tx_key, prv_view_key, derivation))
                     {
-                        cout << "Cant get derived key for output with: \n"
-                             << "pub_tx_key: " << prv_view_key << " skipping" 
-                             <<  '\n';
+                        cout << "Cant get derived key for output with: \n";
                         continue;
                     }
 
